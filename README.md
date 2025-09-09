@@ -1,15 +1,15 @@
-# ModelServeShim: 轻量型大模型服务管控工具
+# ModelServeShim: 轻量型大模型服务管控中间件
 
 ## 一句话介绍
-轻量型大模型服务管控工具，基于 `shim` 抽象层与双插件化架构（`shimlet` 环境适配 + `pipelinelet` 流程扩展），原生集成 `k8sshimlet` 与 `opensourcellm pipelinelet`，支持跨环境部署与自定义流程，简化全生命周期管控。
+极致轻量AI服务管控中间件，基于双插件化架构（`shimlet` 基础环境适配 + `pipeline` 部署流程扩展），原生内置集成`k8s-shimlet`(k8s环境支持) 与 `opensourcellm-pipeline`(开源模型部署流程))，支持跨环境部署与自定义流程，简化全生命周期管控。
 
 
 ## 核心特性
 | 特性分类                | 核心能力说明                                                                 | 关键价值                                                                 |
 |-------------------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------|
 | 插件化跨环境适配架构    | 1. 基于 `shim` 抽象层定义标准化接口，通过 `shimlet` 插件实现环境适配<br>2. 已实现 `k8sshimlet`（深度对接 K8s Deployment/StatefulSet 资源）<br>3. 新增环境仅需开发专属 `shimlet`，核心逻辑与配置完全复用 | 一套管控逻辑覆盖多部署场景，环境扩展无需修改核心代码，开发成本显著降低      |
-| 可定制化部署流水线      | 1. 基于 `pipelinelet` 插件化设计，默认提供 `opensourcellm pipelinelet`（开源大模型部署流程）<br>2. 支持自定义 `pipelinelet` 替换默认流程，可新增量化、权限校验等个性化步骤<br>3. 流水线步骤支持配置重试策略与超时控制 | 兼顾开源模型快速部署与业务场景定制化需求，流程扩展灵活无侵入                |
-| 轻量架构与便捷部署      | 1. 单二进制文件交付（≈15MB），无外部依赖，解压即可启动<br>2. 支持插件热加载，新增 `shimlet`/`pipelinelet` 无需重启服务<br>3. 配置简洁，仅需指定环境插件与流程插件即可运行 | 部署门槛低，运维成本小，适配中小团队快速落地需求                          |
+| 可定制化部署流水线      | 1. 基于 `pipeline` 插件化设计，默认提供 `opensourcellm pipeline`（开源大模型部署流程）<br>2. 支持自定义 `pipeline` 替换默认流程，可新增量化、权限校验等个性化步骤<br>3. 流水线步骤支持配置重试策略与超时控制 | 兼顾开源模型快速部署与业务场景定制化需求，流程扩展灵活无侵入                |
+| 轻量架构与便捷部署      | 1. 单二进制文件交付（≈15MB），无外部依赖，解压即可启动<br>2. 支持插件热加载，新增 `shimlet`/`pipeline` 无需重启服务<br>3. 配置简洁，仅需指定环境插件与流程插件即可运行 | 部署门槛低，运维成本小，适配中小团队快速落地需求                          |
 | 全链路状态可视与监控    | 1. FSM 状态机驱动，实时展示「初始化→流水线执行→环境部署→健康检查→运行中」全流转<br>2. 每个状态与步骤关联详细日志（操作人、耗时、参数）<br>3. 暴露 Prometheus 指标：部署成功率、资源使用率、流水线耗时等 | 状态可追溯，故障可快速定位，服务可用性全程可控                            |
 
 
@@ -17,10 +17,10 @@
 采用“核心逻辑+双插件”解耦设计，兼顾稳定性与扩展性：
 ```
 ┌───────────────┐    ┌───────────────┐    ┌───────────────┐    ┌───────────────┐
-│   API 接入层   │    │  核心服务层   │    │ Pipelinelet 层 │    │   Shim 层     │
+│   API 接入层   │    │  核心服务层   │    │ pipeline 层 │    │   Shim 层     │
 └───────────────┘    └───────────────┘    └───────────────┘    └───────────────┘
     轻量REST接口        状态/配置管理     流程编排与扩展      环境适配抽象
-     （零依赖）       （FSM+轻量存储）   （pipelinelet插件）  （shimlet插件）
+     （零依赖）       （FSM+轻量存储）   （pipeline插件）  （shimlet插件）
                           ↑                     ↑                     ↑
                           └─────────────────────┼─────────────────────┘
                                                 │
@@ -28,7 +28,7 @@
         │                            │                     │                            │
 ┌───────┴───────┐            ┌───────┴───────┐     ┌───────┴───────┐            ┌───────┴───────┐
 │ opensourcellm │            │ 自定义        │     │  k8sshimlet   │            │ 扩展shimlet   │
-│ pipelinelet   │            │ pipelinelet   │     │（K8s适配）    │            │（Docker/ECS等）│
+│ pipeline   │            │ pipeline   │     │（K8s适配）    │            │（Docker/ECS等）│
 └───────────────┘            └───────────────┘     └───────────────┘            └───────────────┘
 ```
 
@@ -51,10 +51,10 @@ chmod +x model-serve-shim
 
 ### 3. 启动服务（加载默认插件）
 ```bash
-# 启用 K8s shimlet 与开源LLM默认 pipelinelet
+# 启用 K8s shimlet 与开源LLM默认 pipeline
 ./model-serve-shim --port=8080 \
   --shimlet=k8s \
-  --pipelinelet=opensourcellm
+  --pipeline=opensourcellm
 ```
 
 ### 4. 部署开源大模型（Llama-3-8B 示例）
@@ -130,19 +130,19 @@ func (d *DockerShimlet) Status(resourceID string) (deploy.Status, error) {
 }
 ```
 
-### 2. 自定义 pipelinelet（增加模型量化步骤）
+### 2. 自定义 pipeline（增加模型量化步骤）
 实现 `Pipeline` 接口，替换默认部署流程：
 ``` go
 // 带量化步骤的自定义流水线
-type QuantLLMPipelinelet struct{}
+type QuantLLMpipeline struct{}
 
 // 定义流水线步骤
-func (p *QuantLLMPipelinelet) Steps() []string {
+func (p *QuantLLMpipeline) Steps() []string {
     return []string{"model-validation", "model-quantization", "config-rendering", "resource-deployment", "health-check"}
 }
 
 // 实现步骤执行逻辑
-func (p *QuantLLMPipelinelet) RunStep(step string, ctx *pipeline.Context) error {
+func (p *QuantLLMpipeline) RunStep(step string, ctx *pipeline.Context) error {
     switch step {
     case "model-quantization":
         // 调用量化工具（如 GGUF）处理模型
@@ -163,7 +163,7 @@ func (p *QuantLLMPipelinelet) RunStep(step string, ctx *pipeline.Context) error 
 | 部署服务         | POST      | `/api/v1/modserv/deploy`          | 使用指定插件创建模型服务实例          |
 | 查询服务状态     | GET       | `/api/v1/modserv/{serviceId}`     | 查看服务整体状态与资源信息            |
 | 查询流水线进度   | GET       | `/api/v1/modserv/{id}/pipeline`   | 查看流水线步骤执行情况                |
-| 列出可用插件     | GET       | `/api/v1/plugins`                 | 查看已加载的shimlet与pipelinelet      |
+| 列出可用插件     | GET       | `/api/v1/plugins`                 | 查看已加载的shimlet与pipeline      |
 | 加载新插件       | POST      | `/api/v1/plugins/load`            | 热加载自定义插件（无需重启服务）       |
 
 
@@ -171,7 +171,7 @@ func (p *QuantLLMPipelinelet) RunStep(step string, ctx *pipeline.Context) error 
 | 插件类型       | 现有实现                | 规划扩展                  |
 |----------------|-------------------------|---------------------------|
 | shimlet        | k8sshimlet              | dockershimlet、edgelet    |
-| pipelinelet    | opensourcellm pipelinelet | privatellm pipelinelet、quant-pipelinelet |
+| pipeline    | opensourcellm pipeline | privatellm pipeline、quant-pipeline |
 
 
 ## 许可证
