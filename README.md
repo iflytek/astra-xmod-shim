@@ -1,4 +1,4 @@
-# ModelServeShim: 轻量型大模型服务管控中间件
+# ModelServeShim 
 
 ## 一句话介绍
 极致轻量AI服务管控中间件，基于双插件化架构（`shimlet` 基础环境适配 + `pipeline` 部署流程扩展），原生内置集成`k8s-shimlet`(k8s环境支持) 与 `opensourcellm-pipeline`(开源模型部署流程))，支持跨环境部署与自定义流程，简化全生命周期管控。
