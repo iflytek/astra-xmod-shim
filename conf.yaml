@@ -1,0 +1,34 @@
+# 应用配置文件（与conf.Config结构体映射）
+
+# Kubernetes客户端配置
+k8s:
+  # kube-config文件路径（集群外必填，集群内可省略）
+  kube-config: "../../kubeconfig"
+  # 客户端QPS限制（控制API请求频率）
+  qps: 20.0
+  # 突发流量允许的最大请求数（超过QPS时的缓冲）
+  burst: 40
+  # 请求超时时间（秒）
+  timeout: 30
+
+# HTTP服务器配置
+http-server:
+  # 监听地址（格式：":端口" 或 "IP:端口"，默认":8080"）
+  port: ":7777"
+
+# 日志配置
+log:
+  # 日志级别（debug/info/warn/error）
+  level: "info"
+  # 日志文件输出路径（相对或绝对路径）
+  output-path: "./logs/app.log"
+  # 单个日志文件最大尺寸（MB），超过则滚动生成新文件
+  max-size: 100
+  # 日志文件保留天数（超过则自动清理）
+  max-age: 7
+  # 是否压缩归档日志（节省磁盘空间）
+  compress: false
+  # 是否在日志中显示代码行号（便于调试）
+  show-line: true
+  # 是否同时输出日志到控制台（开发环境建议开启）
+  enable-console: true
