@@ -1,0 +1,16 @@
+{"level":"INFO","time":"2025-09-10T14:40:36.841+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-10T14:40:58.652+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-10T14:41:05.247+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-10T15:56:36.201+0800","caller":"bootstrap/bootstrap.go:30","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-10T17:06:55.228+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-10T17:06:55.230+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-10T17:06:55.230+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"WARN","time":"2025-09-10T17:07:23.975+0800","caller":"middleware/logging.go:36","msg":"HTTP请求处理完成%!(EXTRA zapcore.Field={method 15 0 POST <nil>}, zapcore.Field={path 15 0 /v1/modserv/deploy <nil>}, zapcore.Field={status 11 404  <nil>}, zapcore.Field={client_ip 15 0 ::1 <nil>}, zapcore.Field={duration 8 83  <nil>})"}
+{"level":"WARN","time":"2025-09-10T17:24:04.051+0800","caller":"middleware/logging.go:36","msg":"HTTP请求处理完成%!(EXTRA zapcore.Field={method 15 0 POST <nil>}, zapcore.Field={path 15 0 /v1/modserv/deploy <nil>}, zapcore.Field={status 11 404  <nil>}, zapcore.Field={client_ip 15 0 ::1 <nil>}, zapcore.Field={duration 8 291  <nil>})"}
+{"level":"ERROR","time":"2025-09-10T17:24:21.631+0800","caller":"handler/dep_handler.go:14","msg":"解析策略请求失败: json: cannot unmarshal array into Go struct field DepReq.env of type map[string]string"}
+{"level":"INFO","time":"2025-09-10T17:25:45.602+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-10T17:25:45.602+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-10T17:25:45.602+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-13T12:20:17.565+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-13T12:20:17.565+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-13T12:20:17.565+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
