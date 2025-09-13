@@ -12,7 +12,7 @@ k8s:
   timeout: 30
 
 # HTTP服务器配置
-http-server:
+server:
   # 监听地址（格式：":端口" 或 "IP:端口"，默认":8080"）
   port: ":7777"
 
@@ -21,7 +21,7 @@ log:
   # 日志级别（debug/info/warn/error）
   level: "info"
   # 日志文件输出路径（相对或绝对路径）
-  output-path: "./logs/app.log"
+  path: "./logs/app.log"
   # 单个日志文件最大尺寸（MB），超过则滚动生成新文件
   max-size: 100
   # 日志文件保留天数（超过则自动清理）
