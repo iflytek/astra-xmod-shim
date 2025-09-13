@@ -6,8 +6,8 @@ type ResourceRequirements struct {
 	AcceleratorCount int    `json:"acceleratorCount"` // 显卡数量
 }
 
-// DepReq 模型部署请求结构体
-type DepReq struct {
+// DeploySpec 模型部署请求结构体
+type DeploySpec struct {
 	ModelFile            string               `json:"modelFile"`
 	ResourceRequirements ResourceRequirements `json:"resourceRequirements"`
 	ReplicaCount         int                  `json:"replicaCount"`

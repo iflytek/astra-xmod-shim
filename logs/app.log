@@ -11,3 +11,6 @@
 {"level":"INFO","time":"2025-09-10T17:25:45.602+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
 {"level":"INFO","time":"2025-09-10T17:25:45.602+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
 {"level":"INFO","time":"2025-09-10T17:25:45.602+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-13T12:20:17.565+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-13T12:20:17.565+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-13T12:20:17.565+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
