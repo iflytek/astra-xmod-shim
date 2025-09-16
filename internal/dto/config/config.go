@@ -1,7 +1,7 @@
-package conf
+package dto
 
-// Config 应用主配置结构体，显式添加mapstructure标签
-type Config struct {
+// GlobalConfig 应用主配置结构体，显式添加mapstructure标签
+type GlobalConfig struct {
 	K8s    K8sConfig `yaml:"k8s" mapstructure:"k8s"`
 	Server Server    `yaml:"server" mapstructure:"server"`
 	Log    LogConfig `yaml:"log" mapstructure:"log"`
@@ -16,7 +16,7 @@ type K8sConfig struct {
 	Timeout    int64   `yaml:"timeout" mapstructure:"timeout"`
 }
 
-// HTTPServer HTTP服务器配置
+// Server HTTP服务器配置
 type Server struct {
 	Port string `yaml:"port" mapstructure:"port"`
 }

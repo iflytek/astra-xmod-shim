@@ -3,8 +3,8 @@ package bootstrap
 import (
 	"fmt"
 	"modserv-shim/api/server"
-	cfgUtil "modserv-shim/internal/cfg"
-	deploy "modserv-shim/internal/dep"
+	"modserv-shim/internal/config"
+	"modserv-shim/internal/engine/shimdrive"
 	"modserv-shim/pkg/log"
 	"sync"
 )
@@ -16,8 +16,8 @@ var (
 func Init(configPath string) error {
 	// TODO bootstrap serval steps impls
 	// 1. 加载配置（日志未初始化，用fmt输出错误）
-	cfgUtil.SetConfigPath(configPath)
-	cfg, err := cfgUtil.Get()
+	config.SetConfigPath(configPath)
+	cfg, err := config.Get()
 	if err != nil {
 		return fmt.Errorf("cfg load err: %w", err) // 此时日志未就绪，返回错误由上层处理
 	}
@@ -28,20 +28,14 @@ func Init(configPath string) error {
 	}
 	log.Info("log configured", "cfg: ", cfg.Log)
 
-	// 初始化 template manager (预计淘汰掉)
-
-	// TODO 初始化 shimDrive
 	// TODO 判断初始化 shimLook
 
-	depMgr := &deploy.DeployManager{}
+	// TODO 初始化 pipeLook
 
-	// TODO 初始化 EventBus
-
-	// TODO 初始化 state manager
-
-	// TODO 初始化 配置指定的 shimlet
-
-	// TODO
+	// TODO 初始化 shimDrive
+	drive := &shimdrive.ShimDrive{}
+	
+	// TODO 初始化 stateTrack
 
 	// 6. 初始化 HTTP Server
 	if err := server.Init(); err != nil {

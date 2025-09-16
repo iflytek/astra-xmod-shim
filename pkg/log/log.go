@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"modserv-shim/internal/model/conf"
+	config "modserv-shim/internal/dto/config"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 
@@ -19,7 +19,7 @@ var (
 )
 
 // Init 初始化日志系统（基于配置）
-func Init(cfg *conf.LogConfig) error {
+func Init(cfg *config.LogConfig) error {
 	// 1. 验证并处理配置默认值
 	if err := setDefaultConfig(cfg); err != nil {
 		return err

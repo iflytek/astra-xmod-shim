@@ -1,4 +1,4 @@
-package model
+package dto
 
 // ResourceRequirements 定义资源需求
 type ResourceRequirements struct {
