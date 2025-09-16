@@ -6,23 +6,26 @@ import (
 )
 
 // 编译时检查 确保实现 shimlet 接口
-var _ shimlook.Shimlet = (*k8sShimlet)(nil)
+var _ shimlook.Shimlet = (*K8sShimlet)(nil)
 
-type k8sShimlet struct {
+func init() {
+
 }
 
-func (k k8sShimlet) InitWithConfig(confPath string) error {
+type K8sShimlet struct {
+}
+
+func (k K8sShimlet) InitWithConfig(confPath string) error {
 	return nil
 }
 
-func (k k8sShimlet) ValidateConfig() {}
-func (k k8sShimlet) Create(spec dto.DeploySpec) (resourceId string, err error) {
+func (k K8sShimlet) Create(spec dto.DeploySpec) (resourceId string, err error) {
 	return "", err
 }
-func (k k8sShimlet) Update(spec dto.DeploySpec) (resourceId string, err error) {
+func (k K8sShimlet) Update(spec dto.DeploySpec) (resourceId string, err error) {
 	return "", err
 }
-func (k k8sShimlet) Delete(resourceId string) (err error) { return nil }
-func (k k8sShimlet) Status(resourceId string) (status *dto.DeployStatus, err error) {
+func (k K8sShimlet) Delete(resourceId string) (err error) { return nil }
+func (k K8sShimlet) Status(resourceId string) (status *dto.DeployStatus, err error) {
 	return nil, err
 }
