@@ -4,7 +4,7 @@ import dto "modserv-shim/internal/dto/deploy"
 
 // Shimlet is the interface that must be implemented by all shimlets.
 type Shimlet interface {
-	InitWithConfig(confPath string) error
+	InitWithConfig(confPath string) (self *Shimlet, err error)
 	Create(spec dto.DeploySpec) (resourceId string, err error)
 	Update(spec dto.DeploySpec) (resourceId string, err error)
 	Delete(resourceId string) (err error)

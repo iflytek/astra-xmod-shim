@@ -15,8 +15,8 @@ func init() {
 type K8sShimlet struct {
 }
 
-func (k K8sShimlet) InitWithConfig(confPath string) error {
-	return nil
+func (k K8sShimlet) InitWithConfig(confPath string) (K8sShimlet *shimlook.Shimlet, err error) {
+	return nil, nil
 }
 
 func (k K8sShimlet) Create(spec dto.DeploySpec) (resourceId string, err error) {
