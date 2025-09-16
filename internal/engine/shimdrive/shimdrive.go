@@ -1,20 +1,18 @@
 package shimdrive
 
 import (
-	"context"
-	model "modserv-shim/internal/model/dep"
+	"modserv-shim/internal/shimlook"
 )
 
-type DeployManager struct {
-	shimlet       shimlets.Shimlet
-	monitorCtxMap map[string]context.Context
+type ShimDrive struct {
+	globalShimlet shimlook.Shimlet
 }
 
-func (d *DeployManager) deploy(depSpec model.DeploySpec) {
+func (d *ShimDrive) deploy(depSpec dto.DeploySpec) {
 
 	// TODO 渲染部署文件
 
-	// TODO 绑定状态 goroutine sidecar
+	// TODO track状态
 
 	// TODO 调用对应 shimlet 执行部署操作
 

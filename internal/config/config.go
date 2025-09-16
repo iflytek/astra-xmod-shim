@@ -1,8 +1,8 @@
-package cfg
+package config
 
 import (
 	"fmt"
-	model "modserv-shim/internal/model/conf"
+	confSpec "modserv-shim/internal/dto/config"
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	globalConfig *model.Config // 修正：使用model.Config（与返回类型一致）
+	globalConfig *confSpec.GlobalConfig // 修正：使用model.Config（与返回类型一致）
 	once         sync.Once
 	initErr      error
 	configPath   string
@@ -23,7 +23,7 @@ func SetConfigPath(path string) {
 }
 
 // Get 懒加载获取配置实例（线程安全）
-func Get() (*model.Config, error) {
+func Get() (*confSpec.GlobalConfig, error) {
 	// 先读锁检查，避免每次加写锁
 	mu.RLock()
 	if globalConfig != nil || initErr != nil {
@@ -45,7 +45,7 @@ func Get() (*model.Config, error) {
 		}
 
 		// 解析配置到结构体
-		globalConfig = &model.Config{}
+		globalConfig = &confSpec.GlobalConfig{}
 		if err := v.Unmarshal(globalConfig); err != nil {
 			initErr = fmt.Errorf("解析配置失败: %w", err)
 			globalConfig = nil
@@ -56,7 +56,7 @@ func Get() (*model.Config, error) {
 		v.WatchConfig()
 		v.OnConfigChange(func(e fsnotify.Event) {
 			fmt.Printf("配置文件已更新: %s\n", e.Name)
-			newConfig := &model.Config{}
+			newConfig := &confSpec.GlobalConfig{}
 			if err := v.Unmarshal(newConfig); err != nil {
 				fmt.Printf("配置热更新失败: %v\n", err)
 				return
