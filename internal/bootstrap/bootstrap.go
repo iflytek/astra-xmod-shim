@@ -2,8 +2,9 @@ package bootstrap
 
 import (
 	"fmt"
+	"modserv-shim/api/server"
 	cfgUtil "modserv-shim/internal/cfg"
-	"modserv-shim/internal/server"
+	deploy "modserv-shim/internal/dep"
 	"modserv-shim/pkg/log"
 	"sync"
 )
@@ -27,11 +28,14 @@ func Init(configPath string) error {
 	}
 	log.Info("log configured", "cfg: ", cfg.Log)
 
-	// TODO 初始化 template manager
+	// 初始化 template manager (预计淘汰掉)
 
-	// TODO 初始化 deploy manager
+	// TODO 初始化 shimDrive
+	// TODO 判断初始化 shimLook
 
-	// TODO 初始化 EventBUS
+	depMgr := &deploy.DeployManager{}
+
+	// TODO 初始化 EventBus
 
 	// TODO 初始化 state manager
 

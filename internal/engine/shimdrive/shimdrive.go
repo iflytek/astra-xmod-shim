@@ -1,13 +1,12 @@
-package dep
+package shimdrive
 
 import (
 	"context"
 	model "modserv-shim/internal/model/dep"
-	"modserv-shim/internal/shim"
 )
 
 type DeployManager struct {
-	shimlet       shim.Shimlet
+	shimlet       shimlets.Shimlet
 	monitorCtxMap map[string]context.Context
 }
 

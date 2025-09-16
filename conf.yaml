@@ -16,6 +16,9 @@ server:
   # 监听地址（格式：":端口" 或 "IP:端口"，默认":8080"）
   port: ":7777"
 
+shimlet:
+  name: "k8s"
+
 # 日志配置
 log:
   # 日志级别（debug/info/warn/error）

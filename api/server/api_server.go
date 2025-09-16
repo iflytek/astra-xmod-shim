@@ -1,11 +1,11 @@
 package server
 
 import (
+	"modserv-shim/api/middleware"
 	"modserv-shim/api/route"
 	"modserv-shim/internal/cfg"
 	"modserv-shim/pkg/http"
 	"modserv-shim/pkg/log"
-	"modserv-shim/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 )

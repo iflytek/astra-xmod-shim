@@ -1,5 +1,5 @@
 // 实现ShimletFactory，负责创建所有类型的Shimlet实例
-package shim
+package shimlook
 
 import (
 	"fmt"
