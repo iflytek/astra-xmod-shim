@@ -2,9 +2,9 @@ package conf
 
 // Config 应用主配置结构体，显式添加mapstructure标签
 type Config struct {
-	K8s        K8sConfig  `yaml:"k8s" mapstructure:"k8s"`
-	HTTPServer HTTPServer `yaml:"http-server" mapstructure:"http-server"`
-	Log        LogConfig  `yaml:"log" mapstructure:"log"`
+	K8s    K8sConfig `yaml:"k8s" mapstructure:"k8s"`
+	Server Server    `yaml:"server" mapstructure:"server"`
+	Log    LogConfig `yaml:"log" mapstructure:"log"`
 }
 
 // K8sConfig Kubernetes客户端配置
@@ -17,14 +17,14 @@ type K8sConfig struct {
 }
 
 // HTTPServer HTTP服务器配置
-type HTTPServer struct {
+type Server struct {
 	Port string `yaml:"port" mapstructure:"port"`
 }
 
 // LogConfig 日志配置
 type LogConfig struct {
 	Level         string `yaml:"level" mapstructure:"level"`
-	OutputPath    string `yaml:"output-path" mapstructure:"output-path"`
+	Path          string `yaml:"path" mapstructure:"path"`
 	MaxSize       int    `yaml:"max-size" mapstructure:"max-size"`
 	MaxAge        int    `yaml:"max-age" mapstructure:"max-age"`
 	Compress      bool   `yaml:"compress" mapstructure:"compress"`

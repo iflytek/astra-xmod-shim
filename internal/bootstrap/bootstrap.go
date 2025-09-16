@@ -2,8 +2,9 @@ package bootstrap
 
 import (
 	"fmt"
+	"modserv-shim/api/server"
 	cfgUtil "modserv-shim/internal/cfg"
-	"modserv-shim/internal/server"
+	deploy "modserv-shim/internal/dep"
 	"modserv-shim/pkg/log"
 	"sync"
 )
@@ -18,20 +19,29 @@ func Init(configPath string) error {
 	cfgUtil.SetConfigPath(configPath)
 	cfg, err := cfgUtil.Get()
 	if err != nil {
-		return fmt.Errorf("配置文件加载失败: %w", err) // 此时日志未就绪，返回错误由上层处理
+		return fmt.Errorf("cfg load err: %w", err) // 此时日志未就绪，返回错误由上层处理
 	}
-	fmt.Println("配置文件加载完成")
 
-	// 2. 用配置初始化日志系统（日志配置来自第一步加载的cfg）
+	// 2. 日志初始化
 	if err := log.Init(&cfg.Log); err != nil {
-		return fmt.Errorf("日志初始化失败: %w", err) // 日志初始化失败，无法使用log输出
+		return fmt.Errorf("log configured error: %w", err) // 日志初始化失败，无法使用log输出
 	}
-	log.Info("日志系统初始化完成", "配置", cfg.Log)
+	log.Info("log configured", "cfg: ", cfg.Log)
 
-	// 3. 初始化HTTP服务器
+	// 初始化 template manager (预计淘汰掉)
 
-	// 注册gin的日志中间件
-	//engine.Use(middleware.Logging())
+	// TODO 初始化 shimDrive
+	// TODO 判断初始化 shimLook
+
+	depMgr := &deploy.DeployManager{}
+
+	// TODO 初始化 EventBus
+
+	// TODO 初始化 state manager
+
+	// TODO 初始化 配置指定的 shimlet
+
+	// TODO
 
 	// 6. 初始化 HTTP Server
 	if err := server.Init(); err != nil {

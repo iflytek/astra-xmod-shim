@@ -11,18 +11,12 @@ type DeploySpec struct {
 	ModelFile            string               `json:"modelFile"`
 	ResourceRequirements ResourceRequirements `json:"resourceRequirements"`
 	ReplicaCount         int                  `json:"replicaCount"`
+	ContextLength        int                  `json:"contextLength"`
 	Env                  []Env                `json:"env"`
 }
 type Env struct {
 	Key string
 	Val string
-}
-
-// DepResp 部署响应结构体
-type DepResp struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-	Data    any    `json:"data,omitempty"`
 }
 
 type EnvVar struct {
