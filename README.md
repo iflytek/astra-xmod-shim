@@ -163,6 +163,10 @@ func (p *QuantLLMpipeline) RunStep(step string, ctx *pipeline.Context) error {
 | shimlet        | k8sshimlet              | dockershimlet、edgelet    |
 | pipeline    | opensourcellm pipeline | privatellm pipeline、quant-pipeline |
 
+## 🛠️ 代码规范
 
+本项目使用 [pre-commit](https://pre-commit.com) 自动检查代码风格，确保提交的代码格式统一。
+
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
 ## 许可证
 Apache License 2.0
