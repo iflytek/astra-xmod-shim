@@ -39,7 +39,7 @@ func Init(cfg *config.LogConfig) error {
 }
 
 // 为缺失的配置项设置默认值
-func setDefaultConfig(cfg *conf.LogConfig) error {
+func setDefaultConfig(cfg *config.LogConfig) error {
 	if cfg.Level == "" {
 		cfg.Level = "info" // 默认info级别
 	}
@@ -50,17 +50,17 @@ func setDefaultConfig(cfg *conf.LogConfig) error {
 		cfg.MaxAge = 7 // 默认保留7天
 	}
 	// 确保日志目录存在
-	if err := os.MkdirAll(filepath.Dir(cfg.OutputPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(cfg.Path), 0755); err != nil {
 		return fmt.Errorf("创建日志目录失败: %w", err)
 	}
 	return nil
 }
 
 // 构建日志核心（输出目标、编码、级别）
-func buildLogCore(cfg *conf.LogConfig) zapcore.Core {
+func buildLogCore(cfg *config.LogConfig) zapcore.Core {
 	// 日志文件输出（带轮转）
 	fileWriter := &lumberjack.Logger{
-		Filename:  cfg.OutputPath,
+		Filename:  cfg.Path,
 		MaxSize:   cfg.MaxSize,
 		MaxAge:    cfg.MaxAge,
 		Compress:  cfg.Compress,
@@ -110,7 +110,7 @@ func buildLogCore(cfg *conf.LogConfig) zapcore.Core {
 }
 
 // 构建zap选项（调用行号等）
-func buildZapOptions(cfg *conf.LogConfig) []zap.Option {
+func buildZapOptions(cfg *config.LogConfig) []zap.Option {
 	var options []zap.Option
 	if cfg.ShowLine {
 		options = append(options, zap.AddCaller())      // 显示调用者信息

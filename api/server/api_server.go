@@ -3,7 +3,7 @@ package server
 import (
 	"modserv-shim/api/middleware"
 	"modserv-shim/api/route"
-	"modserv-shim/internal/cfg"
+	"modserv-shim/internal/config"
 	"modserv-shim/pkg/http"
 	"modserv-shim/pkg/log"
 
@@ -15,11 +15,11 @@ func Init() error {
 
 	gin.SetMode(gin.ReleaseMode) // 放在初始化 Engine 之前
 	// 2. 后续按需获取配置（首次调用Get()时完整初始化）
-	config, _ := config.Get()
-	log.Info("HTTP服务器地址端口%v", config.Server.Port)
+	globalCfg := config.Get()
+	log.Info("HTTP服务器地址端口%v", globalCfg.Server.Port)
 
 	// 3. 初始化通用HTTP服务器
-	httpServer := http.NewServer(config.Server.Port)
+	httpServer := http.NewServer(globalCfg.Server.Port)
 
 	// 注册业务路由
 	route.RegisterRoutes(httpServer)

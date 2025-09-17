@@ -36,7 +36,7 @@ log:
 
 	// 设置配置文件路径并加载
 	SetConfigPath(tmpFile.Name())
-	cfg, err := Get()
+	cfg := Get()
 
 	// 验证结果
 	assert.NoError(t, err)

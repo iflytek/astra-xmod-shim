@@ -1,11 +1,12 @@
 package shimdrive
 
 import (
-	"modserv-shim/internal/shimlook"
+	dto "modserv-shim/internal/dto/deploy"
+	"modserv-shim/internal/shimreg"
 )
 
 type ShimDrive struct {
-	globalShimlet shimlook.Shimlet
+	GlobalShimlet shimreg.Shimlet
 }
 
 func (d *ShimDrive) deploy(depSpec dto.DeploySpec) {
