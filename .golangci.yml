@@ -10,7 +10,7 @@ linters:
     - errcheck      # 检查错误是否被忽略
     - staticcheck   # 高级静态分析
     - unused        # 检查未使用变量/函数
-    - typecheck     # 类型检查
+#    - typecheck     # 类型检查
 
 issues:
   exclude-use-default: false
