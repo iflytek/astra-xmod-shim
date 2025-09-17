@@ -5,8 +5,8 @@ import (
 	"modserv-shim/api/server"
 	"modserv-shim/internal/config"
 	"modserv-shim/internal/engine/shimdrive"
-	"modserv-shim/internal/shimreg"
-	_ "modserv-shim/internal/shimreg/shimlets"
+	"modserv-shim/internal/shimlet"
+	_ "modserv-shim/internal/shimlet/shimlets"
 	"modserv-shim/pkg/log"
 	"sync"
 )
@@ -27,7 +27,7 @@ func Init(configPath string) error {
 	log.Info("log configured", "cfg: ", cfg.Log)
 
 	// choose shimlet
-	runtimeShimlet := shimlet.NewUninitialized(cfg.CurrentShimlet)
+	runtimeShimlet := shimlet.Registry.NewUninitialized(cfg.CurrentShimlet)
 
 	// init shimlet
 	shimletConfPath := cfg.Shimlets[runtimeShimlet.ID()].ConfigPath
@@ -35,7 +35,7 @@ func Init(configPath string) error {
 	if err != nil {
 		log.Error("shimlet init failed", err)
 	}
-
+	
 	// TODO 初始化 pipeReg
 
 	// TODO 初始化 shimDrive

@@ -2,7 +2,7 @@ package shimdrive
 
 import (
 	dto "modserv-shim/internal/dto/deploy"
-	"modserv-shim/internal/shimreg"
+	"modserv-shim/internal/shimlet"
 )
 
 type ShimDrive struct {

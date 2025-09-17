@@ -11,7 +11,6 @@ linters:
     - staticcheck   # 高级静态分析
     - unused        # 检查未使用变量/函数
     - typecheck     # 类型检查
-    - deadcode      # 检查死代码
 
 issues:
   exclude-use-default: false
