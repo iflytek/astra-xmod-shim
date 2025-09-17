@@ -26,14 +26,17 @@ func Init(configPath string) error {
 	}
 	log.Info("log configured", "cfg: ", cfg.Log)
 
-	// init shimReg
-	runtimeShimlet := shimreg.NewUninitialized(cfg.CurrentShimlet)
-	err := runtimeShimlet.InitWithConfig(cfg.Shimlets[runtimeShimlet.ID()].ConfigPath)
+	// choose shimlet
+	runtimeShimlet := shimlet.NewUninitialized(cfg.CurrentShimlet)
+
+	// init shimlet
+	shimletConfPath := cfg.Shimlets[runtimeShimlet.ID()].ConfigPath
+	err := runtimeShimlet.InitWithConfig(shimletConfPath)
 	if err != nil {
 		log.Error("shimlet init failed", err)
 	}
 
-	// TODO 初始化 pipeLook
+	// TODO 初始化 pipeReg
 
 	// TODO 初始化 shimDrive
 	_ = &shimdrive.ShimDrive{GlobalShimlet: runtimeShimlet}

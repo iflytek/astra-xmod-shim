@@ -6,7 +6,7 @@ import (
 )
 
 type ShimDrive struct {
-	GlobalShimlet shimreg.Shimlet
+	GlobalShimlet shimlet.Shimlet
 }
 
 func (d *ShimDrive) deploy(depSpec dto.DeploySpec) {
