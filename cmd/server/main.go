@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"modserv-shim/internal/bootstrap"
+	_ "modserv-shim/internal/shimreg/shimlets" // 显式导入插件依赖包
 	"os"
 
 	"github.com/spf13/cobra"

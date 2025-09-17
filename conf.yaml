@@ -16,8 +16,6 @@ server:
   # 监听地址（格式：":端口" 或 "IP:端口"，默认":8080"）
   port: ":7777"
 
-shimlet:
-  name: "k8s"
 
 # 日志配置
 log:
@@ -35,3 +33,15 @@ log:
   show-line: true
   # 是否同时输出日志到控制台（开发环境建议开启）
   enable-console: true
+
+# 当前生效的 shimlet
+current-shimlet: "k8s"
+
+# shimlet 配置
+shimlets:
+  k8s:
+    config_path: "./configs/mysql-dev.yaml"   # 👈 指向插件配置
+  docker:
+    config_path: "./configs/redis.json"
+  shimmy:
+    enabled: false  # 暂时不启用

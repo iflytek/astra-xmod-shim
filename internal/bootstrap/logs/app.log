@@ -1,0 +1,13 @@
+{"level":"INFO","time":"2025-09-17T12:58:04.010+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:14:49.657+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:15:21.138+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:15:25.641+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:27:21.656+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:27:57.500+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:28:08.866+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:28:26.377+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:29:30.291+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:30:13.230+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:32:32.834+0800","caller":"bootstrap/bootstrap.go:27","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-17T13:32:41.112+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-17T13:32:44.702+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}

@@ -2,9 +2,11 @@ package dto
 
 // GlobalConfig 应用主配置结构体，显式添加mapstructure标签
 type GlobalConfig struct {
-	K8s    K8sConfig `yaml:"k8s" mapstructure:"k8s"`
-	Server Server    `yaml:"server" mapstructure:"server"`
-	Log    LogConfig `yaml:"log" mapstructure:"log"`
+	K8s            K8sConfig                `yaml:"k8s" mapstructure:"k8s"`
+	Server         Server                   `yaml:"server" mapstructure:"server"`
+	Log            LogConfig                `yaml:"log" mapstructure:"log"`
+	CurrentShimlet string                   `yaml:"current-shimlet" mapstructure:"current-shimlet"` // 👈 新增
+	Shimlets       map[string]ShimletConfig `yaml:"shimlets" mapstructure:"shimlets"`
 }
 
 // K8sConfig Kubernetes客户端配置
@@ -30,4 +32,9 @@ type LogConfig struct {
 	Compress      bool   `yaml:"compress" mapstructure:"compress"`
 	ShowLine      bool   `yaml:"show-line" mapstructure:"show-line"`
 	EnableConsole bool   `yaml:"enable-console" mapstructure:"enable-console"`
+}
+
+// ShimletConfig 插件配置（动态）
+type ShimletConfig struct {
+	ConfigPath string `yaml:"config_path" mapstructure:"config_path"`
 }

@@ -1,7 +1,7 @@
 package handler
 
 import (
-	model "modserv-shim/internal/model/dep"
+	model "modserv-shim/internal/dto/deploy"
 	"modserv-shim/pkg/log"
 	"net/http"
 
