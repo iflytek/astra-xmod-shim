@@ -14,6 +14,7 @@ type DeploySpec struct {
 	ContextLength        int                  `json:"contextLength"`
 	Env                  []Env                `json:"env"`
 }
+
 type Env struct {
 	Key string
 	Val string
