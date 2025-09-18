@@ -1,8 +1,8 @@
 package shimlet
 
 import (
+	"modserv-shim/internal/core/typereg"
 	dto "modserv-shim/internal/dto/deploy"
-	"modserv-shim/internal/typereg"
 )
 
 var Registry = typereg.New[Shimlet]()

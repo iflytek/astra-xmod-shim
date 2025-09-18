@@ -1,8 +1,8 @@
 package shimlet_test
 
 import (
-	"modserv-shim/internal/shimlet"
-	_ "modserv-shim/internal/shimlet/shimlets"
+	"modserv-shim/internal/core/shimlet"
+	_ "modserv-shim/internal/core/shimlet/shimlets"
 	"os"
 	"testing"
 )
@@ -14,6 +14,8 @@ func TestMain(m *testing.M) {
 
 // 测试正常配置加载流程
 func TestGetReg(t *testing.T) {
-	a := shimlet.Registry.NewUninitialized("k8s")
-	a.InitWithConfig("k8s")
+	a, _ := shimlet.Registry.GetSingleton("k8s")
+	if a != nil {
+
+	}
 }

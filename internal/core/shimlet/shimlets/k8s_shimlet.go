@@ -1,8 +1,8 @@
 package shimlets
 
 import (
+	"modserv-shim/internal/core/shimlet"
 	dto "modserv-shim/internal/dto/deploy"
-	"modserv-shim/internal/shimlet"
 )
 
 // 编译时检查 确保实现 shimlet 接口
