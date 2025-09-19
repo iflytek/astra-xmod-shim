@@ -22,7 +22,7 @@ func (k *K8sShimlet) InitWithConfig(confPath string) error {
 	return nil
 }
 
-func (k *K8sShimlet) Apply(spec dto.DeploySpec) (resourceId string, err error) {
+func (k *K8sShimlet) Apply(spec *dto.DeploySpec) (resourceId string, err error) {
 	return "", err
 }
 func (k *K8sShimlet) Delete(resourceId string) (err error) { return nil }
