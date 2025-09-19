@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"fmt"
 	"modserv-shim/internal/config"
 	"modserv-shim/internal/core/pipeline"
 	"modserv-shim/internal/core/shimlet"
@@ -11,44 +12,44 @@ import (
 
 type Orchestrator struct {
 	ShimReg *typereg.TypeReg[shimlet.Shimlet]
-	//PipeReg *typereg.TypeReg[*pipeline.Pipeline]
+	PipeReg map[string]*pipeline.Pipeline
 }
 
-func (d *Orchestrator) Provision(spec dto.DeploySpec) {
+var GlobalOrchestrator *Orchestrator
 
-	// TODO 渲染部署文件
-	_ = d.newExecCtx(spec)
+func (d *Orchestrator) Provision(spec *dto.DeploySpec) error {
+
+	runtimePipe := pipeline.Registry[getPipelineName()]
+	if runtimePipe == nil {
+		return fmt.Errorf("pipeline %s not found", getPipelineName())
+	}
 
 	// TODO 调用对应 shimlet 执行部署操作
+	currentShimletId := config.Get().CurrentShimlet
+	runtimeShimlet, err := d.ShimReg.GetSingleton(currentShimletId)
+	if err != nil {
+		log.Error("get runtime shimlet error", err)
+		return err
+	}
+	pipeCtx := &pipeline.Context{
+		Shimlet:    runtimeShimlet,
+		DeploySpec: spec,
+		Data:       make(map[string]any),
+	}
+	// 4. 执行pipeline
+	if err := runtimePipe.Execute(pipeCtx); err != nil {
+		log.Error("pipeline execution failed", err)
+		return err
+	}
 
 	// TODO track状态
 
 	// TODO 颁发 serviceID 并暴露 endpoint
+	return nil
 }
 
 // TODO: [临时] 后续应根据 spec.Type 或 metadata 动态选择 pipeline
 // 示例：spec.Type == "llm" → "ai-pipeline", spec.Type == "web" → "web-pipeline"
 func getPipelineName() string {
 	return "opensource_llm"
-}
-
-func (d *Orchestrator) newExecCtx(spec dto.DeploySpec) (ctx *ExecContext) {
-
-	shimletId := config.Get().CurrentShimlet
-	pipelineId := getPipelineName() // mock method
-
-	runtimeShimlet, err := shimlet.Registry.GetSingleton(shimletId)
-	runtimePipe := pipeline.Registry[pipelineId]
-
-	if err != nil {
-		log.Error("init exec context error", err)
-		return ctx
-	}
-
-	ctx = &ExecContext{
-		shimlet: runtimeShimlet,
-		pipe:    runtimePipe,
-		spec:    spec,
-	}
-	return ctx
 }

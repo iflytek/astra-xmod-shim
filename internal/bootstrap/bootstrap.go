@@ -7,8 +7,7 @@ import (
 	"modserv-shim/internal/core/orchestrator"
 	"modserv-shim/internal/core/pipeline"
 	"modserv-shim/internal/core/shimlet"
-	"modserv-shim/internal/engine/shimdrive"
-	_ "modserv-shim/internal/shimlet/shimlets"
+	_ "modserv-shim/internal/core/shimlet/shimlets"
 	"modserv-shim/pkg/log"
 	"sync"
 )
@@ -32,8 +31,7 @@ func Init(configPath string) error {
 	shimReg := shimlet.Registry
 	pipeReg := pipeline.Registry
 
-	// TODO 初始化 shimDrive
-	_ = &orchestrator.Orchestrator{ShimReg: shimReg, PipeReg: pipeReg}
+	orchestrator.GlobalOrchestrator = &orchestrator.Orchestrator{ShimReg: shimReg, PipeReg: pipeReg}
 
 	// TODO 初始化 stateTrack
 

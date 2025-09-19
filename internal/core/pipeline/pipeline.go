@@ -35,3 +35,13 @@ func (b *Builder) BuildAndRegister() *Pipeline {
 func (b *Builder) Build() *Pipeline {
 	return b.pipeline
 }
+
+// Execute 执行pipeline中的所有步骤
+func (p *Pipeline) Execute(ctx *Context) error {
+	for _, step := range p.steps {
+		if err := step(ctx); err != nil {
+			return err
+		}
+	}
+	return nil
+}

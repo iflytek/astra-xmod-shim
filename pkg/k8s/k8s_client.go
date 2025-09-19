@@ -23,7 +23,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	// 引入配置结构体
-	config "modserv-shim/internal/model/conf"
+	config "modserv-shim/internal/dto/config"
 )
 
 // K8sClient 通用K8s客户端，直接包含所有Informer组件和客户端实例
