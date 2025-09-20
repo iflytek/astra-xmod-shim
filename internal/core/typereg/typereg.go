@@ -1,6 +1,7 @@
 package typereg
 
 import (
+	"modserv-shim/internal/config"
 	"modserv-shim/pkg/log"
 	"reflect"
 	"sync"
@@ -13,7 +14,7 @@ type TypeReg[T interface {
 }] struct {
 	mu                   sync.Mutex
 	constructorMap       map[string]func() T
-	singletonInstanceMap map[string]*T
+	singletonInstanceMap map[string]T
 }
 
 // New 创建一个新的 Registry
@@ -23,7 +24,7 @@ func New[T interface {
 }]() *TypeReg[T] {
 	return &TypeReg[T]{
 		constructorMap:       make(map[string]func() T),
-		singletonInstanceMap: make(map[string]*T),
+		singletonInstanceMap: make(map[string]T),
 	}
 }
 
@@ -50,8 +51,6 @@ func (r *TypeReg[T]) AutoRegister(instance T) {
 
 // NewUninitialized 根据 ID 创建一个新实例
 func (r *TypeReg[T]) newUninitialized(id string) T {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 	if c, ok := r.constructorMap[id]; ok {
 		return c()
 	}
@@ -59,18 +58,22 @@ func (r *TypeReg[T]) newUninitialized(id string) T {
 	return zero
 }
 
-func (r *TypeReg[T]) GetSingleton(id string) (*T, error) {
+func (r *TypeReg[T]) GetSingleton(id string) (T, error) {
+	var zero T
+
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if r.singletonInstanceMap[id] == nil {
-		if r.singletonInstanceMap[id] == nil {
-			singleton := r.newUninitialized(id)
-			if err := singleton.InitWithConfig(""); err != nil {
-				log.Error("singleton init error: ", err)
-				return nil, err
-			}
-			r.singletonInstanceMap[id] = &singleton
+	singleton, exists := r.singletonInstanceMap[id]
+	if !exists {
+		// 实例不存在，创建并初始化
+		singleton = r.newUninitialized(id)
+		confPath := config.Get().Shimlets[id].ConfigPath
+		if err := singleton.InitWithConfig(confPath); err != nil {
+			log.Error("singleton init error: ", err)
+			return zero, err // 返回零值和错误
 		}
+		r.singletonInstanceMap[id] = singleton
 	}
-	return r.singletonInstanceMap[id], nil
+
+	return singleton, nil
 }
