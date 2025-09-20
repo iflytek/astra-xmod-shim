@@ -43,8 +43,8 @@ type K8sClient struct {
 	queue          workqueue.TypedRateLimitingInterface[string] // 泛型事件队列
 }
 
-// newK8sClient 初始化K8s客户端（直接初始化所有组件）
-func newK8sClient(cfg *config.K8sConfig) (*K8sClient, error) {
+// NewK8sClient 初始化K8s客户端（直接初始化所有组件）
+func NewK8sClient(cfg *config.K8sConfig) (*K8sClient, error) {
 	if cfg == nil {
 		return nil, errors.New("K8s配置不能为空")
 	}

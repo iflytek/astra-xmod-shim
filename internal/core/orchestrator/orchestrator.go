@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"modserv-shim/internal/config"
 	"modserv-shim/internal/core/pipeline"
+	_ "modserv-shim/internal/core/pipeline/pipelines"
 	"modserv-shim/internal/core/shimlet"
 	"modserv-shim/internal/core/typereg"
 	dto "modserv-shim/internal/dto/deploy"
@@ -42,9 +43,6 @@ func (d *Orchestrator) Provision(spec *dto.DeploySpec) error {
 		return err
 	}
 
-	// TODO track状态
-
-	// TODO 颁发 serviceID 并暴露 endpoint
 	return nil
 }
 

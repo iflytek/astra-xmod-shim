@@ -6,6 +6,9 @@ import (
 	"modserv-shim/pkg/utils"
 )
 
+func init() {
+	opensourceLLMPipeline()
+}
 func generateServiceId(ctx *pipeline.Context) error {
 	if ctx.DeploySpec.ServiceId == "" {
 		ctx.DeploySpec.ServiceId = utils.GenerateSimpleID()

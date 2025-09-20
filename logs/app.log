@@ -1,16 +1,89 @@
-{"level":"INFO","time":"2025-09-10T14:40:36.841+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
-{"level":"INFO","time":"2025-09-10T14:40:58.652+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
-{"level":"INFO","time":"2025-09-10T14:41:05.247+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
-{"level":"INFO","time":"2025-09-10T15:56:36.201+0800","caller":"bootstrap/bootstrap.go:30","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
-{"level":"INFO","time":"2025-09-10T17:06:55.228+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
-{"level":"INFO","time":"2025-09-10T17:06:55.230+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
-{"level":"INFO","time":"2025-09-10T17:06:55.230+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
-{"level":"WARN","time":"2025-09-10T17:07:23.975+0800","caller":"middleware/logging.go:36","msg":"HTTP请求处理完成%!(EXTRA zapcore.Field={method 15 0 POST <nil>}, zapcore.Field={path 15 0 /v1/modserv/deploy <nil>}, zapcore.Field={status 11 404  <nil>}, zapcore.Field={client_ip 15 0 ::1 <nil>}, zapcore.Field={duration 8 83  <nil>})"}
-{"level":"WARN","time":"2025-09-10T17:24:04.051+0800","caller":"middleware/logging.go:36","msg":"HTTP请求处理完成%!(EXTRA zapcore.Field={method 15 0 POST <nil>}, zapcore.Field={path 15 0 /v1/modserv/deploy <nil>}, zapcore.Field={status 11 404  <nil>}, zapcore.Field={client_ip 15 0 ::1 <nil>}, zapcore.Field={duration 8 291  <nil>})"}
-{"level":"ERROR","time":"2025-09-10T17:24:21.631+0800","caller":"handler/dep_handler.go:14","msg":"解析策略请求失败: json: cannot unmarshal array into Go struct field DepReq.env of type map[string]string"}
-{"level":"INFO","time":"2025-09-10T17:25:45.602+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
-{"level":"INFO","time":"2025-09-10T17:25:45.602+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
-{"level":"INFO","time":"2025-09-10T17:25:45.602+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
-{"level":"INFO","time":"2025-09-13T12:20:17.565+0800","caller":"bootstrap/bootstrap.go:29","msg":"日志系统初始化完成%!(EXTRA string=配置, conf.LogConfig={info ./logs/app.log 100 7 false true true})"}
-{"level":"INFO","time":"2025-09-13T12:20:17.565+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
-{"level":"INFO","time":"2025-09-13T12:20:17.565+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T11:46:00.036+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T11:46:16.973+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T11:46:16.974+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"ERROR","time":"2025-09-20T11:46:37.681+0800","caller":"handler/deploy_handler.go:15","msg":"解析策略请求失败: json: Unmarshal(nil *dto.DeploySpec)"}
+{"level":"INFO","time":"2025-09-20T11:47:19.863+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T11:47:19.864+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T11:47:19.864+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T12:10:10.630+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:10:10.631+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:10:10.631+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T12:11:05.198+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:11:05.198+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:11:09.144+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T12:12:52.455+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:12:52.455+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:13:03.683+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"WARN","time":"2025-09-20T12:14:36.062+0800","caller":"middleware/logging.go:36","msg":"HTTP请求处理完成%!(EXTRA zapcore.Field={method 15 0 GET <nil>}, zapcore.Field={path 15 0 /apple-touch-icon-precomposed.png <nil>}, zapcore.Field={status 11 404  <nil>}, zapcore.Field={client_ip 15 0 127.0.0.1 <nil>}, zapcore.Field={duration 8 208  <nil>})"}
+{"level":"WARN","time":"2025-09-20T12:14:36.062+0800","caller":"middleware/logging.go:36","msg":"HTTP请求处理完成%!(EXTRA zapcore.Field={method 15 0 GET <nil>}, zapcore.Field={path 15 0 /apple-touch-icon.png <nil>}, zapcore.Field={status 11 404  <nil>}, zapcore.Field={client_ip 15 0 127.0.0.1 <nil>}, zapcore.Field={duration 8 42  <nil>})"}
+{"level":"WARN","time":"2025-09-20T12:14:36.063+0800","caller":"middleware/logging.go:36","msg":"HTTP请求处理完成%!(EXTRA zapcore.Field={method 15 0 GET <nil>}, zapcore.Field={path 15 0 /favicon.ico <nil>}, zapcore.Field={status 11 404  <nil>}, zapcore.Field={client_ip 15 0 127.0.0.1 <nil>}, zapcore.Field={duration 8 167  <nil>})"}
+{"level":"WARN","time":"2025-09-20T12:14:36.225+0800","caller":"middleware/logging.go:36","msg":"HTTP请求处理完成%!(EXTRA zapcore.Field={method 15 0 GET <nil>}, zapcore.Field={path 15 0 /api/v1/modserv/deploy <nil>}, zapcore.Field={status 11 404  <nil>}, zapcore.Field={client_ip 15 0 127.0.0.1 <nil>}, zapcore.Field={duration 8 167  <nil>})"}
+{"level":"INFO","time":"2025-09-20T12:15:34.543+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:15:34.544+0800","caller":"server/api_server.go:18","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:15:37.799+0800","caller":"server/api_server.go:30","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T12:17:09.096+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:17:09.096+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:17:09.096+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T12:21:41.242+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:21:41.242+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:21:41.242+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T12:22:18.900+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:22:18.900+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:22:18.900+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T12:25:59.883+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:25:59.883+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:25:59.883+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T12:31:03.784+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:31:03.784+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:31:03.784+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"WARN","time":"2025-09-20T12:31:51.617+0800","caller":"pipelines/opensource_llm_pipeline.go:39","msg":"No resourceId found in context, cannot expose service properly"}
+{"level":"INFO","time":"2025-09-20T12:53:57.031+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:53:57.031+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:53:57.031+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"WARN","time":"2025-09-20T12:55:27.922+0800","caller":"pipelines/opensource_llm_pipeline.go:39","msg":"No resourceId found in context, cannot expose service properly"}
+{"level":"INFO","time":"2025-09-20T12:57:35.260+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T12:57:35.260+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T12:57:35.260+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T13:41:09.847+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T13:41:09.847+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T13:41:09.847+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"ERROR","time":"2025-09-20T13:42:26.016+0800","caller":"typereg/typereg.go:72","msg":"singleton init error: %!(EXTRA *fmt.wrapError=配置文件不存在: stat ./conf/k8s-shimlet.yaml: no such file or directory)"}
+{"level":"ERROR","time":"2025-09-20T13:42:26.016+0800","caller":"orchestrator/orchestrator.go:32","msg":"get runtime shimlet error%!(EXTRA *fmt.wrapError=配置文件不存在: stat ./conf/k8s-shimlet.yaml: no such file or directory)"}
+{"level":"INFO","time":"2025-09-20T13:42:27.512+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T13:42:27.512+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T13:42:27.512+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"ERROR","time":"2025-09-20T13:42:49.121+0800","caller":"typereg/typereg.go:72","msg":"singleton init error: %!(EXTRA *fmt.wrapError=解析配置到结构体失败: result must be addressable (a pointer))"}
+{"level":"ERROR","time":"2025-09-20T13:42:49.121+0800","caller":"orchestrator/orchestrator.go:32","msg":"get runtime shimlet error%!(EXTRA *fmt.wrapError=解析配置到结构体失败: result must be addressable (a pointer))"}
+{"level":"INFO","time":"2025-09-20T13:45:09.206+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T13:45:09.206+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T13:45:09.206+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"ERROR","time":"2025-09-20T13:45:20.284+0800","caller":"typereg/typereg.go:72","msg":"singleton init error: %!(EXTRA *errors.errorString=初始化K8s客户端失败)"}
+{"level":"ERROR","time":"2025-09-20T13:45:20.284+0800","caller":"orchestrator/orchestrator.go:32","msg":"get runtime shimlet error%!(EXTRA *errors.errorString=初始化K8s客户端失败)"}
+{"level":"INFO","time":"2025-09-20T13:50:36.444+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T13:50:36.444+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T13:50:36.444+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"ERROR","time":"2025-09-20T13:50:59.935+0800","caller":"typereg/typereg.go:72","msg":"singleton init error: %!(EXTRA *errors.errorString=初始化K8s客户端失败)"}
+{"level":"ERROR","time":"2025-09-20T13:50:59.935+0800","caller":"orchestrator/orchestrator.go:32","msg":"get runtime shimlet error%!(EXTRA *errors.errorString=初始化K8s客户端失败)"}
+{"level":"INFO","time":"2025-09-20T13:51:43.541+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T13:51:43.541+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T13:51:43.541+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"ERROR","time":"2025-09-20T13:51:57.374+0800","caller":"typereg/typereg.go:72","msg":"singleton init error: %!(EXTRA *errors.errorString=初始化K8s客户端失败)"}
+{"level":"ERROR","time":"2025-09-20T13:51:57.374+0800","caller":"orchestrator/orchestrator.go:32","msg":"get runtime shimlet error%!(EXTRA *errors.errorString=初始化K8s客户端失败)"}
+{"level":"INFO","time":"2025-09-20T13:53:01.178+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T13:53:01.178+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T13:53:01.178+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T13:53:25.794+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T13:53:25.794+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T13:53:25.794+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T14:06:52.583+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T14:06:52.584+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T14:06:52.584+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T14:09:32.865+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T14:09:32.866+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T14:09:32.866+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T14:09:49.704+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T14:09:49.704+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T14:09:49.704+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}
+{"level":"INFO","time":"2025-09-20T14:11:42.567+0800","caller":"bootstrap/bootstrap.go:28","msg":"log configured%!(EXTRA string=cfg: , dto.LogConfig={info ./logs/app.log 100 7 false true true})"}
+{"level":"INFO","time":"2025-09-20T14:11:42.567+0800","caller":"server/api_server.go:19","msg":"HTTP服务器地址端口:7777"}
+{"level":"INFO","time":"2025-09-20T14:11:42.567+0800","caller":"server/api_server.go:31","msg":"HTTP服务器初始化完毕"}

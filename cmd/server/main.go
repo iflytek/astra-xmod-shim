@@ -22,7 +22,7 @@ func main() {
 	rootCmd.Flags().StringVarP(
 		&configPath,
 		"config", "c",
-		"conf.yaml",
+		"conf/base/conf.yaml",
 		"配置文件路径",
 	)
 

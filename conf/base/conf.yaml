@@ -40,8 +40,8 @@ current-shimlet: "k8s"
 # shimlet 配置
 shimlets:
   k8s:
-    config_path: "./configs/mysql-dev.yaml"   # 👈 指向插件配置
+    config_path: "./conf/shimlets/k8s-shimlet.yaml"   # 👈 指向插件配置
   docker:
-    config_path: "./configs/redis.json"
+    config_path: "./conf/docker/docker-shimlet.yaml"
   shimmy:
-    enabled: false  # 暂时不启用
+    config_path: "./conf/shimmy/shimmy-shimlet.yaml"

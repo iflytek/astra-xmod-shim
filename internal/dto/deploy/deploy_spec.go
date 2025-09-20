@@ -8,12 +8,12 @@ type ResourceRequirements struct {
 
 // DeploySpec 模型部署请求结构体
 type DeploySpec struct {
-	ServiceId            string               `json:"serviceId"`
-	ModelFile            string               `json:"modelFile"`
-	ResourceRequirements ResourceRequirements `json:"resourceRequirements"`
-	ReplicaCount         int                  `json:"replicaCount"`
-	ContextLength        int                  `json:"contextLength"`
-	Env                  []Env                `json:"env"`
+	ServiceId            string                `json:"serviceId"`
+	ModelFile            string                `json:"modelFile"`
+	ResourceRequirements *ResourceRequirements `json:"resourceRequirements"`
+	ReplicaCount         int                   `json:"replicaCount"`
+	ContextLength        int                   `json:"contextLength"`
+	Env                  []Env                 `json:"env"`
 }
 
 type Env struct {
