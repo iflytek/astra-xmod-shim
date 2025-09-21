@@ -41,6 +41,9 @@ func (k *K8sShimlet) InitWithConfig(confPath string) error {
 	if err != nil {
 		return errors.New("初始化K8s客户端失败")
 	}
+	if k == nil {
+		return nil
+	}
 	k.client = client
 	return nil
 }
@@ -67,7 +70,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 			limits := corev1.ResourceList{}
 
 			// 添加GPU资源
-			limits[corev1.ResourceName(deploySpec.ResourceRequirements.AcceleratorType)] = 
+			limits[corev1.ResourceName(deploySpec.ResourceRequirements.AcceleratorType)] =
 				resource.MustParse(fmt.Sprintf("%d", deploySpec.ResourceRequirements.AcceleratorCount))
 			resources.WithLimits(limits)
 		}

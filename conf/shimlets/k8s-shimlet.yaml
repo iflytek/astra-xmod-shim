@@ -1,5 +1,5 @@
 # K8sShimlet 专用配置
-kube-config: "/Users/haoxuanli/Documents/GitHub/iflytek/modserv-shim/conf/shimlets/kubeconfig"
+kube-config: "/opt/modserv-shim/conf/shimlets/kubeconfig"
 context: "your-cluster-context"
 qps: 20.0
 burst: 40

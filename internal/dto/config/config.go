@@ -7,6 +7,7 @@ type GlobalConfig struct {
 	Log            LogConfig                `yaml:"log" mapstructure:"log"`
 	CurrentShimlet string                   `yaml:"current-shimlet" mapstructure:"current-shimlet"` // 👈 新增
 	Shimlets       map[string]ShimletConfig `yaml:"shimlets" mapstructure:"shimlets"`
+	ModelManage    ModelManageConfig        `yaml:"model-manage" mapstructure:"model-manage"`
 }
 
 // K8sConfig Kubernetes客户端配置
@@ -36,5 +37,10 @@ type LogConfig struct {
 
 // ShimletConfig 插件配置（动态）
 type ShimletConfig struct {
-	ConfigPath string `yaml:"config_path" mapstructure:"config_path"`
+	ConfigPath string `yaml:"config-path" mapstructure:"config-path"`
+}
+
+// ModelManageConfig 模型管理配置
+type ModelManageConfig struct {
+	ModelRoot string `yaml:"model-root" mapstructure:"model-route"`
 }
