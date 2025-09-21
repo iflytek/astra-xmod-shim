@@ -9,7 +9,8 @@ type ResourceRequirements struct {
 // DeploySpec 模型部署请求结构体
 type DeploySpec struct {
 	ServiceId            string                `json:"serviceId"`
-	ModelFile            string                `json:"modelFile"`
+	ModelName            string                `json:"modelName"`
+	ModelFileDir         string                `json:"modelFileDir"`
 	ResourceRequirements *ResourceRequirements `json:"resourceRequirements"`
 	ReplicaCount         int                   `json:"replicaCount"`
 	ContextLength        int                   `json:"contextLength"`

@@ -19,6 +19,7 @@ func DoDeploy(c *gin.Context) {
 		})
 		return
 	}
+
 	err := orchestrator.GlobalOrchestrator.Provision(depSpec)
 	if err != nil {
 		return
