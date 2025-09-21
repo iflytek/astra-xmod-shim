@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"modserv-shim/internal/config"
 	"modserv-shim/internal/core/shimlet"
 	cfg "modserv-shim/internal/dto/config"
 	dto "modserv-shim/internal/dto/deploy"
 	"modserv-shim/pkg/k8s"
+	"modserv-shim/pkg/utils"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -49,27 +51,27 @@ func (k *K8sShimlet) InitWithConfig(confPath string) error {
 }
 
 // Apply 使用 Server-Side Apply 方法部署应用（修复版）
+// Apply 使用 Server-Side Apply 方法部署应用（修复版）
 func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 	// 1. 创建容器配置
+
+	deploymentName := utils.ModelNameToDeploymentName(deploySpec.ModelName) + "-" + deploySpec.ServiceId
+	mainContainerName := utils.ModelNameToDeploymentName(deploySpec.ModelName)
+	imageName := "artifacts.iflytek.com/docker-private/aiaas/vllm-openai:v0.4.2"
+
 	container := &corev1apply.ContainerApplyConfiguration{}
-	container.WithName(deploySpec.ServiceId)
-	// 使用 vllm 稳定版本，支持 OpenAI-like API
-	container.WithImage("vllm/vllm-openai:v0.4.2")
+	container.WithName(mainContainerName)
+	container.WithImage(imageName)
 	container.WithImagePullPolicy(corev1.PullIfNotPresent)
 
 	// 2. 添加资源需求
 	if deploySpec.ResourceRequirements != nil {
 		resources := &corev1apply.ResourceRequirementsApplyConfiguration{}
-		// 不设置任何CPU和内存限制
 		resources.WithRequests(corev1.ResourceList{})
 		resources.WithLimits(corev1.ResourceList{})
 
-		// 添加GPU加速卡配置（如果有）
 		if deploySpec.ResourceRequirements.AcceleratorType != "" && deploySpec.ResourceRequirements.AcceleratorCount > 0 {
-			// 创建只包含GPU的limits对象
 			limits := corev1.ResourceList{}
-
-			// 添加GPU资源
 			limits[corev1.ResourceName(deploySpec.ResourceRequirements.AcceleratorType)] =
 				resource.MustParse(fmt.Sprintf("%d", deploySpec.ResourceRequirements.AcceleratorCount))
 			resources.WithLimits(limits)
@@ -78,24 +80,26 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 		container.WithResources(resources)
 	}
 
-	// 3. 添加环境变量 - 为vllm配置OpenAI兼容模式
-	// 基础环境变量
+	// 3. 生成随机端口（使用NodePort范围30000-32767）
+	randomPort := rand.Int31n(2768) + 30000 // 随机端口范围: 30000-32767
+	portStr := fmt.Sprintf("%d", randomPort)
+
+	// 4. 添加环境变量
 	envVars := []*corev1apply.EnvVarApplyConfiguration{
 		{
 			Name:  &[]string{"MODEL"}[0],
-			Value: &[]string{"facebook/opt-125m"}[0], // 默认模型，可根据需要更改
+			Value: &[]string{"facebook/opt-125m"}[0],
 		},
 		{
 			Name:  &[]string{"SERVING_ENGINE"}[0],
-			Value: &[]string{"openai"}[0], // 启用OpenAI兼容模式
+			Value: &[]string{"openai"}[0],
 		},
 		{
 			Name:  &[]string{"PORT"}[0],
-			Value: &[]string{"8000"}[0], // API服务端口
+			Value: &[]string{portStr}[0],
 		},
 	}
 
-	// 添加用户自定义环境变量
 	for _, env := range deploySpec.Env {
 		envVar := &corev1apply.EnvVarApplyConfiguration{}
 		envVar.WithName(env.Key)
@@ -105,12 +109,16 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 
 	container.WithEnv(envVars...)
 
-	// 4. 添加端口配置
-	container.WithPorts(&corev1apply.ContainerPortApplyConfiguration{Name: &[]string{"http"}[0], ContainerPort: &[]int32{8000}[0]})
+	// 5. 添加端口配置，使用随机端口
+	container.WithPorts(&corev1apply.ContainerPortApplyConfiguration{Name: &[]string{"http"}[0], ContainerPort: &[]int32{randomPort}[0]})
 
-	// 5. 构建完整的Deployment配置
+	// 5. 构建完整的Deployment配置（补充 apiVersion 和 kind）
 	deploymentApply := &appsv1apply.DeploymentApplyConfiguration{}
-	deploymentApply.WithName(deploySpec.ServiceId)
+	// 关键修复：添加 API版本和资源类型（必填！）
+	deploymentApply.WithAPIVersion("apps/v1") // Deployment 的标准 API 版本
+	deploymentApply.WithKind("Deployment")    // 资源类型为 Deployment
+	// 原有字段不变
+	deploymentApply.WithName(deploymentName)
 	deploymentApply.WithNamespace("default")
 	deploymentApply.WithLabels(map[string]string{
 		"app":        deploySpec.ServiceId,
@@ -130,8 +138,9 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 	template := &corev1apply.PodTemplateSpecApplyConfiguration{}
 	template.WithLabels(map[string]string{"app": deploySpec.ServiceId})
 
-	// 9. 设置Pod Spec
+	// 9. 设置Pod Spec，启用hostNetwork
 	podSpec := &corev1apply.PodSpecApplyConfiguration{}
+	podSpec.WithHostNetwork(true) // 启用hostNetwork模式
 	podSpec.WithContainers(container)
 	template.WithSpec(podSpec)
 
@@ -149,10 +158,9 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 		return "", fmt.Errorf("部署应用失败: %w", err)
 	}
 
-	return fmt.Sprintf("应用 %s/%s 部署成功", result.Namespace, result.Name), nil
+	return fmt.Sprintf("应用 %s/%s 部署成功，使用hostNetwork并暴露端口 %d", result.Namespace, result.Name, randomPort), nil
 }
 
-// 删除、状态查询等方法保持不变
 func (k *K8sShimlet) Delete(resourceId string) error                      { return nil }
 func (k *K8sShimlet) Status(resourceId string) (*dto.DeployStatus, error) { return nil, nil }
 func (k *K8sShimlet) Description() string                                 { return "k8s shimlet" }

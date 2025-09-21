@@ -19,7 +19,9 @@ type Orchestrator struct {
 var GlobalOrchestrator *Orchestrator
 
 func (d *Orchestrator) Provision(spec *dto.DeploySpec) error {
-
+	// 覆盖掉 nvidia.com/gpu 的 limit
+	spec.ResourceRequirements.AcceleratorType = "nvidia.com/gpu"
+	
 	runtimePipe := pipeline.Registry[getPipelineName()]
 	if runtimePipe == nil {
 		return fmt.Errorf("pipeline %s not found", getPipelineName())
