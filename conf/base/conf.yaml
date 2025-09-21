@@ -47,4 +47,4 @@ shimlets:
     config-path: "./conf/shimmy/shimmy-shimlet.yaml"
 
 model-manage:
-  model-root: "model-root"
+  model-root: "/mnt/maasmodels/"

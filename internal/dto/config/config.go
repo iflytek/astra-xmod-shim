@@ -42,5 +42,5 @@ type ShimletConfig struct {
 
 // ModelManageConfig 模型管理配置
 type ModelManageConfig struct {
-	ModelRoot string `yaml:"model-root" mapstructure:"model-route"`
+	ModelRoot string `yaml:"model-root" mapstructure:"model-root"`
 }
