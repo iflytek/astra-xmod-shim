@@ -8,6 +8,7 @@ import (
 	"modserv-shim/internal/core/pipeline"
 	"modserv-shim/internal/core/shimlet"
 	_ "modserv-shim/internal/core/shimlet/shimlets"
+	"modserv-shim/internal/core/tracer"
 	"modserv-shim/pkg/log"
 	"sync"
 )
@@ -33,7 +34,9 @@ func Init(configPath string) error {
 
 	orchestrator.GlobalOrchestrator = &orchestrator.Orchestrator{ShimReg: shimReg, PipeReg: pipeReg}
 
-	// TODO 初始化 stateTrack
+	// 初始化全局Tracer单例
+	tracer.GetGlobalTracer()
+	log.Info("Global tracer initialized")
 
 	// 6. 初始化 HTTP Server
 	if err := server.Init(); err != nil {

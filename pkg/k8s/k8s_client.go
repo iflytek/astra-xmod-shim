@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	k8s_errors "k8s.io/apimachinery/pkg/api/errors" // 关键：必须导入这个包
+	k8s_errors "k8s.io/apimachinery/pkg/api/errors" // Critical: Must import this package
 	"k8s.io/apimachinery/pkg/labels"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -438,20 +438,20 @@ func (c *K8sClient) UpsertConfigMap(namespace, name string) (*corev1.ConfigMap, 
 
 	// 6. 资源已存在，更新（保留ResourceVersion实现乐观锁）
 	targetCM.ObjectMeta.ResourceVersion = existingCM.ObjectMeta.ResourceVersion
-	// 保留原有标签（避免覆盖其他标签）
+	// Preserve existing labels (avoid overwriting other labels)
 	for k, v := range existingCM.Labels {
 		if _, ok := targetCM.Labels[k]; !ok {
 			targetCM.Labels[k] = v
 		}
 	}
-	// 保留原有注解（仅更新last-updated）
+	// Preserve existing annotations (only update last-updated)
 	for k, v := range existingCM.Annotations {
 		if k != "last-updated" {
 			targetCM.Annotations[k] = v
 		}
 	}
 
-	// 执行更新
+	// Execute update
 	return c.client.CoreV1().ConfigMaps(namespace).Update(
 		context.Background(),
 		targetCM,
@@ -459,24 +459,24 @@ func (c *K8sClient) UpsertConfigMap(namespace, name string) (*corev1.ConfigMap, 
 	)
 }
 
-// UpsertStrategyConfigMap 原子化创建或更新存储Strategy的ConfigMap
+// UpsertStrategyConfigMap Atomically create or update ConfigMap that stores Strategy
 func (c *K8sClient) getConfigMap(namespace, name string) (*corev1.ConfigMap, error) {
-	// 1. 验证参数合法性
+	// 1. Validate parameter legality
 	if err := validateConfigMapName(name); err != nil {
-		return nil, fmt.Errorf("ConfigMap名称不合法: %w", err)
+		return nil, fmt.Errorf("ConfigMap name is invalid: %w", err)
 	}
 	if namespace == "" {
-		return nil, errors.New("命名空间不能为空")
+		return nil, errors.New("namespace cannot be empty")
 	}
 
-	// 2. 尝试获取现有ConfigMap
+	// 2. Try to get existing ConfigMap
 	existingCM, err := c.client.CoreV1().ConfigMaps(namespace).Get(
 		context.Background(),
 		name,
 		metav1.GetOptions{},
 	)
 
-	// 5. 处理存在/不存在的情况（使用errors.IsNotFound判断）
+	// 5. Handle existence/non-existence cases (using errors.IsNotFound to determine)
 	if err != nil {
 		return nil, fmt.Errorf("查询ConfigMap失败: %w", err)
 	}
@@ -484,35 +484,35 @@ func (c *K8sClient) getConfigMap(namespace, name string) (*corev1.ConfigMap, err
 	return existingCM, nil
 }
 
-// validateConfigMapName 验证ConfigMap名称合法性
+// validateConfigMapName Validate ConfigMap name legality
 func validateConfigMapName(name string) error {
 	if len(name) == 0 {
-		return errors.New("名称不能为空")
+		return errors.New("name cannot be empty")
 	}
 	if len(name) > 63 {
-		return errors.New("名称长度不能超过63个字符")
+		return errors.New("name length cannot exceed 63 characters")
 	}
 	if !regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`).MatchString(name) {
-		return errors.New("名称只能包含小写字母、数字、连字符(-)和点(.)，且不能以连字符开头或结尾")
+		return errors.New("name can only contain lowercase letters, numbers, hyphens (-), and dots (.), and cannot start or end with a hyphen")
 	}
 	return nil
 }
 
-// GetConfigMapFromCache 从缓存查询 ConfigMap（修复后）
+// GetConfigMapFromCache Query ConfigMap from cache (fixed)
 func (c *K8sClient) GetConfigMapFromCache(namespace, name string) (*corev1.ConfigMap, error) {
-	// 1. 通过 GenericLister 获取指定命名空间的 Lister
+	// 1. Get namespace-specific Lister through GenericLister
 	nsLister := c.cmLister.ByNamespace(namespace)
 
-	// 2. 从命名空间 Lister 中查询指定名称的 ConfigMap
+	// 2. Query specified ConfigMap from namespace Lister
 	obj, err := nsLister.Get(name)
 	if err != nil {
-		return nil, fmt.Errorf("从缓存查询ConfigMap失败: %w", err)
+		return nil, fmt.Errorf("failed to query ConfigMap from cache: %w", err)
 	}
 
-	// 3. 类型转换为 *corev1.ConfigMap
+	// 3. Type conversion to *corev1.ConfigMap
 	cm, ok := obj.(*corev1.ConfigMap)
 	if !ok {
-		return nil, errors.New("缓存中的资源不是ConfigMap类型")
+		return nil, errors.New("resource in cache is not of type ConfigMap")
 	}
 
 	return cm, nil
@@ -526,25 +526,25 @@ func (c *K8sClient) DeleteConfigMap(ns string, name string) error {
 	)
 }
 
-// ListNodesByLabelFromCache 从informer缓存查询带指定标签的节点
+// ListNodesByLabelFromCache Query nodes with specified labels from informer cache
 func (c *K8sClient) ListNodesByLabelFromCache(labelSelector string) ([]*corev1.Node, error) {
-	// 解析标签选择器
+	// Parse label selector
 	selector := labels.Everything()
 	if labelSelector != "" {
 		var err error
 		selector, err = labels.Parse(labelSelector)
 		if err != nil {
-			return nil, fmt.Errorf("解析标签选择器失败: %w", err)
+			return nil, fmt.Errorf("failed to parse label selector: %w", err)
 		}
 	}
 
-	// 从节点Lister查询缓存（节点是集群级资源，无需指定命名空间）
+	// Query from node Lister cache (nodes are cluster-level resources, no namespace needed)
 	objs, err := c.nodeLister.List(selector)
 	if err != nil {
-		return nil, fmt.Errorf("从缓存查询节点失败: %w", err)
+		return nil, fmt.Errorf("failed to query nodes from cache: %w", err)
 	}
 
-	// 类型转换为*corev1.Node
+	// Type conversion to *corev1.Node
 	nodes := make([]*corev1.Node, 0, len(objs))
 	for _, obj := range objs {
 		if node, ok := obj.(*corev1.Node); ok {
@@ -554,9 +554,9 @@ func (c *K8sClient) ListNodesByLabelFromCache(labelSelector string) ([]*corev1.N
 	return nodes, nil
 }
 
-// NodesHaveTaint 判断节点列表是否包含指定污点
-// taintKey: 污点键（如 "node-role.kubernetes.io/master"）
-// taintEffect: 污点效果（如 "NoSchedule"，传空则不校验效果）
+// NodesHaveTaint Determine if node list contains specified taint
+// taintKey: Taint key (e.g., "node-role.kubernetes.io/master")
+// taintEffect: Taint effect (e.g., "NoSchedule", empty means no effect check)
 func (c *K8sClient) NodesHaveTaint(nodes []*corev1.Node, taintKey, taintEffect string) map[string]bool {
 	result := make(map[string]bool, len(nodes))
 	for _, node := range nodes {
@@ -573,16 +573,16 @@ func (c *K8sClient) NodesHaveTaint(nodes []*corev1.Node, taintKey, taintEffect s
 	return result
 }
 
-// AddTaintsToNodes 为指定节点列表添加污点（幂等性处理）
+// AddTaintsToNodes Add taints to specified node list (idempotent handling)
 func (c *K8sClient) AddTaintsToNodes(nodes []*corev1.Node, taintKey, taintValue, taintEffect string) error {
 	if len(nodes) == 0 {
-		return errors.New("节点列表不能为空")
+		return errors.New("node list cannot be empty")
 	}
 	if taintKey == "" || taintEffect == "" {
-		return errors.New("污点键和效果不能为空")
+		return errors.New("taint key and effect cannot be empty")
 	}
 
-	// 验证污点效果合法性
+	// Validate taint effect legality
 	validEffects := map[corev1.TaintEffect]bool{
 		corev1.TaintEffectNoSchedule:       true,
 		corev1.TaintEffectNoExecute:        true,
@@ -590,7 +590,7 @@ func (c *K8sClient) AddTaintsToNodes(nodes []*corev1.Node, taintKey, taintValue,
 	}
 	effect := corev1.TaintEffect(taintEffect)
 	if !validEffects[effect] {
-		return fmt.Errorf("不支持的污点效果: %s", taintEffect)
+		return fmt.Errorf("unsupported taint effect: %s", taintEffect)
 	}
 
 	targetTaint := corev1.Taint{
@@ -600,13 +600,13 @@ func (c *K8sClient) AddTaintsToNodes(nodes []*corev1.Node, taintKey, taintValue,
 	}
 
 	for _, node := range nodes {
-		// 检查是否已存在相同污点
+		// Check if same taint already exists
 		hasTaint := false
 		for _, t := range node.Spec.Taints {
 			if t.Key == targetTaint.Key && t.Effect == targetTaint.Effect {
-				// 若值不同则更新
+				// Update if values differ
 				if t.Value != targetTaint.Value {
-					log.Info("节点 %s 污点 %s:%s 值不同，将更新", node.Name, taintKey, taintEffect)
+					log.Info("Node %s taint %s:%s has different value, will update", node.Name, taintKey, taintEffect)
 				} else {
 					hasTaint = true
 					break
@@ -615,43 +615,43 @@ func (c *K8sClient) AddTaintsToNodes(nodes []*corev1.Node, taintKey, taintValue,
 		}
 
 		if hasTaint {
-			log.Info("节点 %s 已包含污点 %s:%s，跳过", node.Name, taintKey, taintEffect)
+			log.Info("Node %s already contains taint %s:%s, skipping", node.Name, taintKey, taintEffect)
 			continue
 		}
 
-		// 深拷贝避免修改缓存
+		// Deep copy to avoid modifying cache
 		nodeCopy := node.DeepCopy()
 		nodeCopy.Spec.Taints = append(nodeCopy.Spec.Taints, targetTaint)
 
-		// 执行更新
+		// Execute update
 		_, err := c.client.CoreV1().Nodes().Update(context.Background(), nodeCopy, metav1.UpdateOptions{})
 		if err != nil {
-			log.Error("为节点 %s 添加污点失败: %v", node.Name, err)
+			log.Error("Failed to add taint to node %s: %v", node.Name, err)
 			continue
 		}
-		log.Info("成功为节点 %s 添加污点 %s=%s:%s", node.Name, taintKey, taintValue, taintEffect)
+		log.Info("Successfully added taint %s=%s:%s to node %s", node.Name, taintKey, taintValue, taintEffect)
 	}
 
 	return nil
 }
 
-// RemoveTaintsFromNodes 从指定节点列表移除指定污点
+// RemoveTaintsFromNodes Remove specified taint from node list
 func (c *K8sClient) RemoveTaintsFromNodes(nodes []*corev1.Node, taintKey, taintEffect string) error {
 	if len(nodes) == 0 {
-		return errors.New("节点列表不能为空")
+		return errors.New("node list cannot be empty")
 	}
 	if taintKey == "" {
-		return errors.New("污点键不能为空")
+		return errors.New("taint key cannot be empty")
 	}
 
-	// 转换污点效果（允许空值，表示不限制效果）
+	// Convert taint effect (allow empty value to indicate no effect restriction)
 	var effect corev1.TaintEffect
 	if taintEffect != "" {
 		effect = corev1.TaintEffect(taintEffect)
 	}
 
 	for _, node := range nodes {
-		// 检查是否存在目标污点
+		// Check if target taint exists
 		taintIndex := -1
 		for i, t := range node.Spec.Taints {
 			if t.Key == taintKey && (taintEffect == "" || t.Effect == effect) {
@@ -661,43 +661,43 @@ func (c *K8sClient) RemoveTaintsFromNodes(nodes []*corev1.Node, taintKey, taintE
 		}
 
 		if taintIndex == -1 {
-			log.Info("节点 %s 不存在污点 %s:%s，跳过", node.Name, taintKey, taintEffect)
+			log.Info("Node %s does not have taint %s:%s, skipping", node.Name, taintKey, taintEffect)
 			continue
 		}
 
-		// 深拷贝避免修改缓存
+		// Deep copy to avoid modifying cache
 		nodeCopy := node.DeepCopy()
-		// 移除目标污点
+		// Remove target taint
 		nodeCopy.Spec.Taints = append(
 			nodeCopy.Spec.Taints[:taintIndex],
 			nodeCopy.Spec.Taints[taintIndex+1:]...,
 		)
 
-		// 执行更新
+		// Execute update
 		_, err := c.client.CoreV1().Nodes().Update(context.Background(), nodeCopy, metav1.UpdateOptions{})
 		if err != nil {
-			log.Error("从节点 %s 移除污点失败: %v", node.Name, err)
+			log.Error("Failed to remove taint from node %s: %v", node.Name, err)
 			continue
 		}
-		log.Info("成功从节点 %s 移除污点 %s:%s", node.Name, taintKey, taintEffect)
+		log.Info("Successfully removed taint %s:%s from node %s", node.Name, taintKey, taintEffect)
 	}
 
 	return nil
 }
 
-// ListPendingPodNamesInNamespace 查询指定命名空间下处于Pending状态的Pod名称列表
+// ListPendingPodNamesInNamespace Query list of Pod names in Pending state in specified namespace
 func (c *K8sClient) ListPendingPodNamesInNamespace(namespace string) ([]string, error) {
 	if namespace == "" {
-		return nil, errors.New("命名空间不能为空")
+		return nil, errors.New("namespace cannot be empty")
 	}
 
-	// 从缓存查询该命名空间下的所有Pod
+	// Query all Pods in the namespace from cache
 	pods, err := c.ListPods(namespace, metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("查询命名空间 %s 下的Pod失败: %w", namespace, err)
+		return nil, fmt.Errorf("failed to query Pods in namespace %s: %w", namespace, err)
 	}
 
-	// 筛选Pending状态的Pod名称
+	// Filter Pod names in Pending state
 	var pendingPodNames []string
 	for _, pod := range pods {
 		if pod.Status.Phase == corev1.PodPending {
@@ -708,35 +708,35 @@ func (c *K8sClient) ListPendingPodNamesInNamespace(namespace string) ([]string, 
 	return pendingPodNames, nil
 }
 
-// DeletePodsOnNodesInNamespace 删除指定节点和命名空间下的Pod
+// DeletePodsOnNodesInNamespace Delete Pods on specified nodes and namespace
 func (c *K8sClient) DeletePodsOnNodesInNamespace(namespace string, nodes []*corev1.Node) error {
 	if namespace == "" {
-		return errors.New("命名空间不能为空")
+		return errors.New("namespace cannot be empty")
 	}
 	if len(nodes) == 0 {
-		return errors.New("节点列表不能为空")
+		return errors.New("node list cannot be empty")
 	}
 
-	// 提取节点名称映射，便于快速查找
+	// Extract node name map for quick lookup
 	nodeNameMap := make(map[string]struct{})
 	for _, node := range nodes {
 		nodeNameMap[node.Name] = struct{}{}
 	}
 
-	// 从缓存查询指定命名空间下的所有Pod
+	// Query all Pods in the namespace from cache
 	pods, err := c.ListPods(namespace, metav1.ListOptions{})
 	if err != nil {
-		return fmt.Errorf("查询命名空间 %s 下的Pod失败: %w", namespace, err)
+		return fmt.Errorf("failed to query Pods in namespace %s: %w", namespace, err)
 	}
 
-	// 筛选出位于目标节点上的Pod并删除
+	// Filter Pods on target nodes and delete them
 	for _, pod := range pods {
-		// 检查Pod是否调度到目标节点
+		// Check if Pod is scheduled to target node
 		if pod.Spec.NodeName == "" {
-			continue // 跳过未调度的Pod
+			continue // Skip unscheduled Pods
 		}
 		if _, exists := nodeNameMap[pod.Spec.NodeName]; !exists {
-			continue // 不在目标节点列表中，跳过
+			continue // Not in target node list, skip
 		}
 
 		// 执行删除操作
@@ -746,14 +746,14 @@ func (c *K8sClient) DeletePodsOnNodesInNamespace(namespace string, nodes []*core
 			metav1.DeleteOptions{},
 		)
 		if err != nil {
-			// 忽略已不存在的错误，其他错误记录后继续
-			if !k8s_errors.IsNotFound(err) {
-				log.Error("删除Pod %s/%s 失败: %v", namespace, pod.Name, err)
-				continue
-			}
-		} else {
-			log.Info("删除Pod %s/%s 成功", namespace, pod.Name)
+			// Ignore not found errors, log other errors and continue
+		if !k8s_errors.IsNotFound(err) {
+			log.Error("Failed to delete Pod %s/%s: %v", namespace, pod.Name, err)
+			continue
 		}
+	} else {
+		log.Info("Successfully deleted Pod %s/%s", namespace, pod.Name)
+	}
 	}
 
 	return nil

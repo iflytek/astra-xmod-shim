@@ -1,172 +1,298 @@
-# ModelServeShim 
+## Project Overview
+ModelServeShim is a lightweight AI service orchestration middleware designed with a plugin-based architecture to simplify the deployment, operation, and management of large language model services. By abstracting the environment adaptation layer (shimlet) and extendable deployment workflows (pipeline), it achieves unified cross-environment management capabilities and supports rapid integration of new deployment environments and custom model deployment workflows.
 
-## 一句话介绍
-极致轻量AI服务管控中间件，基于双插件化架构（`shimlet` 基础环境适配 + `pipeline` 部署流程扩展），原生内置集成`k8s-shimlet`(k8s环境支持) 与 `opensourcellm-pipeline`(开源模型部署流程))，支持跨环境部署与自定义流程，简化全生命周期管控。
+## Core Features
+- **Plugin-based Cross-environment Adaptation**: Based on the shim abstraction layer design, enables seamless adaptation to different environments through shimlet plugins
+- **Customizable Deployment Workflows**: Based on the pipeline plugin architecture, supports custom model deployment steps and workflows
+- **Lightweight and Efficient**: Single binary delivery with no external dependencies and low resource consumption
+- **Full Lifecycle Management**: Supports complete lifecycle management of model services including deployment, monitoring, updating, and destruction
+- **Hot Reload Mechanism**: Supports hot reloading of plugins, enabling feature updates without restarting the service
 
-## 命名释义
-ModelServeShim（简称 modserv-shim）由两部分构成：
+## Technical Architecture
+ModelServeShim adopts a "core logic + dual plugins" decoupled design architecture, mainly consisting of the following components:
 
-ModelServe：体现核心能力 —— 聚焦大模型（Model）的服务化部署与运维（Serve）；
-Shim：源自技术术语 “适配层”，指通过抽象接口屏蔽底层环境差异，是实现跨环境统一管控的核心设计。
+1. **Core Engine**: Responsible for overall process coordination, state management, and API provision
+2. **Shim Abstraction Layer**: Defines standardized interfaces to shield underlying environment differences
+3. **Pipeline Engine**: Manages various stages and steps of model deployment
+4. **Plugin Management System**: Handles loading, unloading, and lifecycle management of plugins
 
-## 核心特性
-| 特性分类                | 核心能力说明                                                                 | 关键价值                                                                 |
-|-------------------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| 插件化跨环境适配架构    | 1. 基于 `shim` 抽象层定义标准化接口，通过 `shimlet` 插件实现环境适配<br>2. 已实现 `k8sshimlet`（深度对接 K8s Deployment/StatefulSet 资源）<br>3. 新增环境仅需开发专属 `shimlet`，核心逻辑与配置完全复用 | 一套管控逻辑覆盖多部署场景，环境扩展无需修改核心代码，开发成本显著降低      |
-| 可定制化部署流水线      | 1. 基于 `pipeline` 插件化设计，默认提供 `opensourcellm pipeline`（开源大模型部署流程）<br>2. 支持自定义 `pipeline` 替换默认流程，可新增量化、权限校验等个性化步骤<br>3. 流水线步骤支持配置重试策略与超时控制 | 兼顾开源模型快速部署与业务场景定制化需求，流程扩展灵活无侵入                |
-| 轻量架构与便捷部署      | 1. 单二进制文件交付（≈15MB），无外部依赖，解压即可启动<br>2. 支持插件热加载，新增 `shimlet`/`pipeline` 无需重启服务<br>3. 配置简洁，仅需指定环境插件与流程插件即可运行 | 部署门槛低，运维成本小，适配中小团队快速落地需求                          |
-| 全链路状态可视与监控    | 1. FSM 状态机驱动，实时展示「初始化→流水线执行→环境部署→健康检查→运行中」全流转<br>2. 每个状态与步骤关联详细日志（操作人、耗时、参数）<br>3. 暴露 Prometheus 指标：部署成功率、资源使用率、流水线耗时等 | 状态可追溯，故障可快速定位，服务可用性全程可控                            |
+![Architecture Diagram]()
 
+### Core Component Description
+- **Core Engine**: Processes API requests, manages service states, and coordinates the work of various components
+- **Shim Layer**: Implements adaptation to different environments (such as K8s, Docker) through unified interface definitions
+- **Pipeline Layer**: Defines and executes various steps of model deployment, such as model validation, configuration rendering, resource deployment, etc.
+- **State Management**: Implements reliable service state transitions and tracking based on finite state machines
 
-## 技术架构
-采用“核心逻辑+双插件”解耦设计，兼顾稳定性与扩展性：
+## Quick Start
+### Environment Requirements
+- Go 1.20+ (development environment)
+- Target environment (e.g., K8s v1.20+, if using K8s shimlet)
 
-![img.png](img.png)
-
-## 快速上手（K8s + 开源LLM默认流水线）
-### 1. 环境准备
-- K8s 集群（v1.20+），已配置 GPU 调度（nvidia-device-plugin）
-- 本地 `kubectl` 可访问集群（配置 KUBECONFIG）
-
-### 2. 下载安装
+### Installation
 ```bash
-# 下载单文件二进制（Linux x86_64）
-wget https://github.com/your-org/ModelServeShim/releases/latest/download/model-serve-shim
+# Download binary file (Linux x86_64)
+wget https://github.com/iflytek/modserv-shim/releases/latest/download/model-serve-shim
 chmod +x model-serve-shim
 
-# 验证安装（无依赖检查）
-./model-serve-shim --version
-# 输出示例：ModelServeShim v1.0.0 (commit: abc123)
+# Or build from source
+git clone https://github.com/iflytek/modserv-shim.git
+cd modserv-shim
+make build
 ```
 
-### 3. 启动服务（加载默认插件）
+### Basic Usage
 ```bash
-# 启用 K8s shimlet 与开源LLM默认 pipeline
+# Start the service, loading K8s shimlet and open source LLM deployment workflow
 ./model-serve-shim --port=8080 \
   --shimlet=k8s \
   --pipeline=opensourcellm
 ```
 
-### 4. 部署开源大模型（Llama-3-8B 示例）
+## API Reference
+### Deploy Model Service
 ```bash
 curl -X POST http://localhost:8080/api/v1/modserv/deploy \
   -H "Content-Type: application/json" \
-  -d '{
-    "modelName": "llama-3-8b",
-    "modelFile": "/models/llama-3-8b",
-    "resourceRequirements": {
-      "acceleratorType": "NVIDIA H20",
-      "acceleratorCount": 1,
-      "cpu": "4",
-      "memory": "16Gi"
-    },
-    "replicaCount": 1
+  -d '{ \
+    "modelName": "example-model", \
+    "modelFile": "/path/to/model", \
+    "resourceRequirements": { \
+      "acceleratorType": "NVIDIA GPU", \
+      "acceleratorCount": 1, \
+      "cpu": "4", \
+      "memory": "16Gi" \
+    }, \
+    "replicaCount": 1 \
   }'
-
-# 响应示例（获取 serviceId 跟踪进度）
-{
-  "code": 0,
-  "data": {
-    "serviceId": "llama-3-8b-123e4567-e89b-12d3-a456-426614174000",
-    "currentStep": "model-validation",
-    "totalSteps": ["model-validation", "config-rendering", "resource-deployment", "health-check"]
-  }
-}
 ```
 
-### 5. 查看部署状态与流水线进度
+### Query Service Status
 ```bash
-# 查看整体状态
-curl http://localhost:8080/api/v1/modserv/llama-3-8b-123e4567-e89b-12d3-a456-426614174000
-
-# 查看流水线详细执行日志
-curl http://localhost:8080/api/v1/modserv/llama-3-8b-123e4567-e89b-12d3-a456-426614174000/pipeline/logs
+curl http://localhost:8080/api/v1/modserv/{serviceId}
 ```
 
-
-## 插件扩展示例
-### 1. 新增 shimlet（适配 Docker 环境）
-只需实现 `Shim` 抽象接口，即可接入新环境：
-``` go
-// dockershimlet 核心实现
-type DockerShimlet struct{}
-
-// 实现创建资源接口
-func (d *DockerShimlet) Create(ctx *deploy.Context) (string, error) {
-    // 调用 Docker SDK 创建容器
-    container, err := dockerClient.ContainerCreate(
-        context.Background(),
-        &container.Config{Image: ctx.ModelImage},
-        &container.HostConfig{Resources: getDockerResources(ctx.Requirements)},
-        nil, nil, ctx.ModelName)
-    if err != nil {
-        return "", fmt.Errorf("create docker container failed: %v", err)
-    }
-    // 启动容器
-    return container.ID, dockerClient.ContainerStart(context.Background(), container.ID, types.ContainerStartOptions{})
-}
-
-// 实现查询状态接口
-func (d *DockerShimlet) Status(resourceID string) (deploy.Status, error) {
-    // 查询 Docker 容器状态
-    inspect, err := dockerClient.ContainerInspect(context.Background(), resourceID)
-    if err != nil {
-        return deploy.StatusFailed, err
-    }
-    if inspect.State.Running {
-        return deploy.StatusRunning, nil
-    }
-    return deploy.StatusStopped, nil
-}
+### List Loaded Plugins
+```bash
+curl http://localhost:8080/api/v1/plugins
 ```
 
-### 2. 自定义 pipeline（增加模型量化步骤）
-实现 `Pipeline` 接口，替换默认部署流程：
-``` go
-// 带量化步骤的自定义流水线
-type QuantLLMpipeline struct{}
+## Plugin Development Guide
+### Shimlet Development (Environment Adaptation Plugin)
+Shimlet is responsible for converting abstract deployment requests into operations specific to a particular environment. Below is an example of developing a custom shimlet:
 
-// 定义流水线步骤
-func (p *QuantLLMpipeline) Steps() []string {
-    return []string{"model-validation", "model-quantization", "config-rendering", "resource-deployment", "health-check"}
+#### Built-in Example: Kubernetes Shimlet
+ModelServeShim natively includes the Kubernetes Shimlet for deploying model services in Kubernetes environments. It implements the standard Shim interface and can convert abstract deployment requests into Kubernetes resource operations (such as creating Deployments and Services).
+
+#### Step 1: Implement the Shim Interface
+```go
+package myshimlet
+
+import (
+    "context"
+    "modserv-shim/internal/core/deploy"
+)
+
+// MyShimlet implements a custom environment adaptation plugin
+type MyShimlet struct{}
+
+// Create creates resources
+func (s *MyShimlet) Create(ctx *deploy.Context) (string, error) {
+    // Implement resource creation logic
+    // Return resource ID
+    return "resource-id", nil
 }
 
-// 实现步骤执行逻辑
-func (p *QuantLLMpipeline) RunStep(step string, ctx *pipeline.Context) error {
-    switch step {
-    case "model-quantization":
-        // 调用量化工具（如 GGUF）处理模型
-        return quantizeModel(ctx.ModelFile, ctx.QuantConfig)
-    case "model-validation":
-        return validateModel(ctx.ModelFile)
-    // 实现其他步骤...
-    default:
-        return fmt.Errorf("unsupported step: %s", step)
-    }
+// Status queries resource status
+func (s *MyShimlet) Status(resourceID string) (deploy.Status, error) {
+    // Implement resource status query logic
+    return deploy.StatusRunning, nil
+}
+
+// Delete deletes resources
+func (s *MyShimlet) Delete(resourceID string) error {
+    // Implement resource deletion logic
+    return nil
+}
+
+// GetResourceInfo gets detailed resource information
+func (s *MyShimlet) GetResourceInfo(resourceID string) (map[string]interface{}, error) {
+    // Implement detailed resource information retrieval logic
+    return map[string]interface{}{"id": resourceID}, nil
 }
 ```
 
+#### Step 2: Register the Plugin
+```go
+package myshimlet
 
-## 常用 API 参考
-| 操作类型         | HTTP 方法 | 接口路径                          | 说明                                  |
-|------------------|-----------|-----------------------------------|---------------------------------------|
-| 部署服务         | POST      | `/api/v1/modserv/deploy`          | 使用指定插件创建模型服务实例          |
-| 查询服务状态     | GET       | `/api/v1/modserv/{serviceId}`     | 查看服务整体状态与资源信息            |
-| 查询流水线进度   | GET       | `/api/v1/modserv/{id}/pipeline`   | 查看流水线步骤执行情况                |
-| 列出可用插件     | GET       | `/api/v1/plugins`                 | 查看已加载的shimlet与pipeline      |
-| 加载新插件       | POST      | `/api/v1/plugins/load`            | 热加载自定义插件（无需重启服务）       |
+import (
+    "modserv-shim/internal/core/plugin"
+)
 
+// init function is automatically called when the plugin is loaded
+func init() {
+    // Register the custom shimlet
+    plugin.RegisterShimlet("my-shimlet", &MyShimlet{})
+}
+```
 
-## 插件生态路线图
-| 插件类型       | 现有实现                | 规划扩展                  |
-|----------------|-------------------------|---------------------------|
-| shimlet        | k8sshimlet              | dockershimlet、edgelet    |
-| pipeline    | opensourcellm pipeline | privatellm pipeline、quant-pipeline |
+### Pipeline Development (Deployment Workflow Plugin)
+Pipeline defines the specific steps and execution logic for model deployment. ModelServeShim implements Pipeline using the Builder pattern. Below is an example of developing a custom pipeline:
 
-## 🛠️ 代码规范
+#### Built-in Example: OpenSourceLLM Pipeline
+ModelServeShim natively includes the OpenSourceLLM Pipeline for open source large model deployment workflows. It is implemented using the Builder pattern and includes key steps such as generating service IDs, mapping model names to paths, applying service configurations, and exposing service endpoints, enabling users to quickly deploy open source large model services.
 
-本项目使用 [pre-commit](https://pre-commit.com) 自动检查代码风格，确保提交的代码格式统一。
+#### Step 1: Define Pipeline Step Functions
+```go
+package mypipeline
 
-[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://pre-commit.com/)
-## 许可证
-Apache License 2.0
+import (
+    "modserv-shim/internal/core/pipeline"
+    "modserv-shim/pkg/log"
+)
+
+// Define pipeline step functions of type func(*pipeline.Context) error
+
+// validateModel validates model effectiveness
+func validateModel(ctx *pipeline.Context) error {
+    log.Info("Starting to validate model: %s", ctx.DeploySpec.ModelName)
+    // Implement model validation logic
+    return nil
+}
+
+// processConfig processes deployment configuration
+func processConfig(ctx *pipeline.Context) error {
+    log.Info("Processing deployment configuration")
+    // Implement configuration processing logic
+    return nil
+}
+
+// prepareResources prepares deployment resources
+func prepareResources(ctx *pipeline.Context) error {
+    log.Info("Preparing deployment resources")
+    // Implement resource preparation logic
+    return nil
+}
+```
+
+#### Step 2: Create and Register Pipeline
+```go
+package mypipeline
+
+import (
+    "modserv-shim/internal/core/pipeline"
+)
+
+// init function is automatically called when the plugin is loaded
+func init() {
+    // Create and register custom pipeline using Builder pattern
+    myCustomPipeline()
+}
+
+// myCustomPipeline creates a custom pipeline instance
+func myCustomPipeline() *pipeline.Pipeline {
+    // Use New() to create builder, Step() to add steps, BuildAndRegister() to complete construction and registration
+    return pipeline.New("my-pipeline").
+        Step(validateModel).
+        Step(processConfig).
+        Step(prepareResources).
+        BuildAndRegister()
+}
+```
+
+### Extended Example: Docker Shimlet
+In addition to the built-in Kubernetes Shimlet, developers can implement Docker environment adaptation plugins to deploy model services in Docker containers. Docker Shimlet creates and manages containers through the Docker API, supporting complete lifecycle management of model services.
+
+### Extended Example: Business Scenario Pipeline
+Developers can create dedicated Pipelines based on specific business requirements. For example:
+- **Multimodal Model Service Pipeline**: Add special validation steps for text and image processing, optimize GPU allocation strategies, configure dedicated inference parameters
+- **Edge Deployment Pipeline**: Add resource limit checks, model quantization optimization, offline inference support and other special steps
+- **Enterprise Security Pipeline**: Integrate identity verification, encrypted transmission, access control and other security enhancement features
+
+### Plugin Integration Method
+
+ModelServeShim implements plugin integration using Go's initialization registration mechanism, not through shared library compilation and hot loading.
+
+#### Built-in Plugin Integration
+Built-in plugins (such as Kubernetes Shimlet) are automatically registered into the framework through the `init()` function:
+```go
+// Example of K8sShimlet registration method
+func init() {
+    shimlet.Registry.AutoRegister(&K8sShimlet{})
+}
+```
+
+#### Custom Plugin Integration
+Custom plugins can be integrated into ModelServeShim through the following methods:
+
+1. **Implement Standard Interfaces**: Implement the `Shimlet` or `Pipeline` interfaces as shown in the documentation
+2. **Automatic Registration**: Complete automatic registration using the registry in the `init()` function
+3. **Recompile**: Place the custom plugin code in the correct package path, then recompile the entire application
+
+#### Plugin Selection and Configuration
+Specify the plugins to use through command-line parameters or configuration files:
+```bash
+# Specify plugins via command line
+./model-serve-shim --shimlet=k8s --pipeline=opensourcellm
+
+# Specify plugins via configuration file
+# Set in config.yaml
+defaultShimlet: k8s
+defaultPipeline: opensourcellm
+```
+
+## Configuration Instructions
+ModelServeShim supports configuration through command-line parameters and configuration files:
+
+### Command-line Parameters
+```bash
+./model-serve-shim --help
+
+Usage of model-serve-shim:
+  --port int              Service listening port (default: 8080)
+  --config string         Configuration file path
+  --shimlet string        Default loaded shimlet plugin
+  --pipeline string       Default loaded pipeline plugin
+  --plugin-dir string     Plugin directory path
+  --log-level string      Log level (debug, info, warn, error) (default: "info")
+```
+
+### Configuration File
+The configuration file uses YAML format:
+```yaml
+# config.yaml
+service:
+  port: 8080
+  readTimeout: 30s
+  writeTimeout: 30s
+
+plugins:
+  defaultShimlet: k8s
+  defaultPipeline: opensourcellm
+  pluginDir: ./plugins
+  preload: 
+    - type: shimlet
+      path: ./plugins/myshimlet.so
+    - type: pipeline
+      path: ./plugins/mypipeline.so
+
+logging:
+  level: info
+  format: text
+  output: stdout
+```
+
+## Contribution Guide
+We welcome community contributions. Please read the following guidelines before contributing:
+
+1. Fork the repository and create your own branch
+2. Follow the project's code standards (use pre-commit for code style checks)
+3. Ensure all tests pass before submitting code
+4. Submit a Pull Request describing the changes made and the problems solved
+
+## License
+ModelServeShim is licensed under the Apache License 2.0.
+
+## Contact Us
+For questions or suggestions, please contact us through the following channels:
