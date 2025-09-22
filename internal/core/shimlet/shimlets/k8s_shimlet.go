@@ -10,32 +10,39 @@ import (
 	cfg "modserv-shim/internal/dto/config"
 	dto "modserv-shim/internal/dto/deploy"
 	"modserv-shim/pkg/k8s"
+	"modserv-shim/pkg/log"
 	"modserv-shim/pkg/utils"
+
+	"path/filepath"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	// ApplyConfigurations 包
+	"k8s.io/apimachinery/pkg/labels"
 	appsv1apply "k8s.io/client-go/applyconfigurations/apps/v1"
 	corev1apply "k8s.io/client-go/applyconfigurations/core/v1"
 	metav1apply "k8s.io/client-go/applyconfigurations/meta/v1"
-	"path/filepath"
-	"strings"
 )
 
-// 编译时检查 确保实现 shimlet 接口
+// Ensure K8sShimlet implements the Shimlet interface at compile time
 var _ shimlet.Shimlet = (*K8sShimlet)(nil)
 
 func init() {
 	shimlet.Registry.AutoRegister(&K8sShimlet{})
 }
 
+// K8sShimlet provides a Kubernetes-based deployment shim for model serving.
+// It uses server-side apply to declaratively manage Deployment resources.
 type K8sShimlet struct {
 	client *k8s.K8sClient
 }
 
+// ID returns the unique identifier for this shimlet.
 func (k *K8sShimlet) ID() string { return "k8s" }
 
+// InitWithConfig initializes the K8sShimlet with configuration from the given path.
+// It reads the K8s-specific config and establishes a connection to the cluster.
 func (k *K8sShimlet) InitWithConfig(confPath string) error {
 	k8sCfg, err := config.GetConfFromFileDir[cfg.K8sConfig](confPath)
 	if err != nil {
@@ -43,7 +50,7 @@ func (k *K8sShimlet) InitWithConfig(confPath string) error {
 	}
 	client, err := k8s.NewK8sClient(k8sCfg)
 	if err != nil {
-		return errors.New("初始化K8s客户端失败")
+		return errors.New("failed to initialize K8s client")
 	}
 	if k == nil {
 		return nil
@@ -52,27 +59,27 @@ func (k *K8sShimlet) InitWithConfig(confPath string) error {
 	return nil
 }
 
-// Apply 使用 Server-Side Apply 方法部署应用（修复版）
-// 主要修复：
-// 1. 移除 model 路径的 'local:' 前缀（vLLM 不支持）
-// 2. 确保 modelDirPath 是目录（非文件）
-// 3. 正确设置 hostPath volume type
-// 4. 确保 volumeMount 路径与 --model 参数一致
+// Apply deploys a model server using a Kubernetes Deployment via Server-Side Apply.
+// Key fixes and features:
+//   - Strips 'local:' prefix from model path (vLLM does not accept it)
+//   - Ensures modelDirPath refers to a directory, not a file
+//   - Correctly sets HostPath volume type to Directory
+//   - Mounts the model volume at the same path used in --model and MODEL env
+//
+// Returns a success message with exposed port, or an error if deployment fails.
 func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
-	// 1. 创建容器配置
+	// Generate deployment and container names
 	deploymentName := utils.ModelNameToDeploymentName(deploySpec.ModelName) + "-" + deploySpec.ServiceId
 	mainContainerName := utils.ModelNameToDeploymentName(deploySpec.ModelName)
 	imageName := "artifacts.iflytek.com/docker-private/aiaas/vllm-openai:v0.4.2"
-	// 使用映射后的模型路径（通过pipeline的mapModelNameToPath步骤设置）
-	modelDirPath := deploySpec.ModelFileDir
+	modelDirPath := deploySpec.ModelFileDir // Use mapped model path from pipeline
 
-	// 如果ModelFileDir为空，直接报错
+	// Validate model path is provided
 	if modelDirPath == "" {
-		return "", errors.New("模型路径不能为空，请提供有效的模型名称")
+		return "", errors.New("model path cannot be empty; please provide a valid model name")
 	}
 
-	// ✅ 关键修复：确保 modelDirPath 是目录，不是文件
-	// 如果传入的是模型文件（如 .bin, .safetensors），取其父目录
+	// If the path points to a model file, extract its parent directory
 	if strings.HasSuffix(strings.ToLower(modelDirPath), ".bin") ||
 		strings.HasSuffix(strings.ToLower(modelDirPath), ".safetensors") ||
 		strings.HasSuffix(strings.ToLower(modelDirPath), ".pt") ||
@@ -80,17 +87,18 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 		modelDirPath = filepath.Dir(modelDirPath)
 	}
 
-	// 再次校验路径是否有效
+	// Final validation of resolved model directory path
 	if modelDirPath == "" || modelDirPath == "." || modelDirPath == "/" {
-		return "", errors.New("解析后的模型路径无效")
+		return "", errors.New("resolved model path is invalid")
 	}
 
+	// Initialize container configuration
 	container := &corev1apply.ContainerApplyConfiguration{}
 	container.WithName(mainContainerName)
 	container.WithImage(imageName)
 	container.WithImagePullPolicy(corev1.PullIfNotPresent)
 
-	// 2. 添加资源需求
+	// Configure resource requirements if specified
 	if deploySpec.ResourceRequirements != nil {
 		resources := &corev1apply.ResourceRequirementsApplyConfiguration{}
 		resources.WithRequests(corev1.ResourceList{})
@@ -98,72 +106,72 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 
 		if deploySpec.ResourceRequirements.AcceleratorType != "" && deploySpec.ResourceRequirements.AcceleratorCount > 0 {
 			limits := corev1.ResourceList{}
-			limits[corev1.ResourceName(deploySpec.ResourceRequirements.AcceleratorType)] =
-				resource.MustParse(fmt.Sprintf("%d", deploySpec.ResourceRequirements.AcceleratorCount))
+			acceleratorResource := corev1.ResourceName(deploySpec.ResourceRequirements.AcceleratorType)
+			limits[acceleratorResource] = resource.MustParse(fmt.Sprintf("%d", deploySpec.ResourceRequirements.AcceleratorCount))
 			resources.WithLimits(limits)
 		}
 
 		container.WithResources(resources)
 	}
 
-	// 3. 生成随机端口（使用NodePort范围30000-32767）
-	randomPort := rand.Int31n(2768) + 30000 // 随机端口范围: 30000-32767
+	// Allocate random NodePort in range 30000–32767
+	randomPort := rand.Int31n(2768) + 30000
 	portStr := fmt.Sprintf("%d", randomPort)
 
-	// 4. 添加环境变量
-	// ✅ 移除 local: 前缀，vLLM 需要纯路径
+	// Define environment variables for the container
 	envVars := []*corev1apply.EnvVarApplyConfiguration{
 		{
-			Name:  &[]string{"MODEL"}[0],
-			Value: &modelDirPath, // ✅ 直接使用路径，不要加 "local:"
+			Name:  ptr("MODEL"),
+			Value: &modelDirPath, // Model root directory (no 'local:' prefix)
 		},
 		{
-			Name:  &[]string{"SERVING_ENGINE"}[0],
-			Value: &[]string{"openai"}[0],
+			Name:  ptr("SERVING_ENGINE"),
+			Value: ptr("openai"),
 		},
 		{
-			Name:  &[]string{"PORT"}[0],
+			Name:  ptr("PORT"),
 			Value: &portStr,
 		},
-		// ✅ 强制离线模式（防止 HF 联网下载）
 		{
-			Name:  &[]string{"TRANSFORMERS_OFFLINE"}[0],
-			Value: &[]string{"1"}[0],
+			Name:  ptr("TRANSFORMERS_OFFLINE"),
+			Value: ptr("1"), // Enforce offline mode to prevent Hugging Face downloads
 		},
-		// ✅ 避免 HF 写默认目录失败
 		{
-			Name:  &[]string{"HF_HOME"}[0],
-			Value: &[]string{"/tmp"}[0],
+			Name:  ptr("HF_HOME"),
+			Value: ptr("/tmp"), // Avoid permission issues with default HF cache location
+		},
+		{
+			Name:  ptr("SERVICE_ID"),
+			Value: ptr(deploySpec.ServiceId), // Persist serviceId in environment variable
 		},
 	}
 
+	// Append custom environment variables from deployment spec
 	for _, env := range deploySpec.Env {
 		envVar := &corev1apply.EnvVarApplyConfiguration{}
 		envVar.WithName(env.Key)
 		envVar.WithValue(env.Val)
 		envVars = append(envVars, envVar)
 	}
-
 	container.WithEnv(envVars...)
 
-	// 5. 添加端口配置，使用随机端口
+	// Expose HTTP port on the container
 	container.WithPorts(
 		corev1apply.ContainerPort().
 			WithName("http").
 			WithContainerPort(randomPort),
 	)
 
-	// ✅ 关键修复：添加 args，确保 vLLM 监听指定端口并使用本地模型路径
-	// ✅ 在 --model 参数中移除 'local:' 前缀
+	// Set command-line arguments for vLLM OpenAI API server
 	container.WithArgs(
 		"--host=0.0.0.0",
 		"--port="+portStr,
-		"--model="+modelDirPath, // ✅ 纯路径
+		"--model="+modelDirPath, // Model path must match volume mount
 		"--dtype=auto",
-		"--trust-remote-code", // ✅ Qwen 必须加
+		"--trust-remote-code", // Required for models like Qwen
 	)
 
-	// 6. 构建完整的Deployment配置
+	// Build Deployment object using Apply Configuration pattern
 	deploymentApply := &appsv1apply.DeploymentApplyConfiguration{}
 	deploymentApply.WithAPIVersion("apps/v1")
 	deploymentApply.WithKind("Deployment")
@@ -173,75 +181,132 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 		"app":        deploySpec.ServiceId,
 		"managed-by": "modserv-shim",
 	})
+	deploymentApply.WithAnnotations(map[string]string{
+		"modserv-shim/service-id": deploySpec.ServiceId,
+	})
 
-	// 设置Spec
+	// Configure Deployment spec
 	spec := &appsv1apply.DeploymentSpecApplyConfiguration{}
 	spec.WithReplicas(int32(deploySpec.ReplicaCount))
 
-	// 设置选择器
+	// Define label selector for Pod matching
 	selector := &metav1apply.LabelSelectorApplyConfiguration{}
 	selector.WithMatchLabels(map[string]string{"app": deploySpec.ServiceId})
 	spec.WithSelector(selector)
 
-	// 设置Pod模板
+	// Configure Pod template
 	template := &corev1apply.PodTemplateSpecApplyConfiguration{}
 	template.WithLabels(map[string]string{"app": deploySpec.ServiceId})
 
-	// 设置Pod Spec
+	// Configure Pod specification
 	podSpec := &corev1apply.PodSpecApplyConfiguration{}
-	podSpec.WithHostNetwork(true) // 启用hostNetwork模式
+	podSpec.WithHostNetwork(true) // Use host network for direct port exposure
 
-	// ✅ 添加容忍所有污点
+	// Set nodeSelector as a local variable
+	// This can be modified to match specific node requirements
+	nodeSelector := map[string]string{}
+	// Example: To schedule on nodes with GPU label
+	// nodeSelector["nvidia.com/gpu.present"] = "true"
+	// Enable nodeSelector if it contains any key-value pairs
+	if len(nodeSelector) > 0 {
+		podSpec.WithNodeSelector(nodeSelector)
+	}
+
+	// Tolerate all taints to allow scheduling on dedicated GPU nodes
 	podSpec.WithTolerations(
 		corev1apply.Toleration().
 			WithKey("").
 			WithOperator(corev1.TolerationOpExists),
 	)
 
-	// ✅ 正确方式：使用链式调用添加 Volume（hostPath 挂载模型目录）
+	// Mount host model directory into the container using HostPath
 	podSpec.WithVolumes(
 		corev1apply.Volume().
 			WithName("models").
 			WithHostPath(
 				corev1apply.HostPathVolumeSource().
-					WithPath(modelDirPath). // 宿主机路径
-					WithType(corev1.HostPathDirectory), // ✅ 明确指定为目录
+					WithPath(modelDirPath).             // Host machine path
+					WithType(corev1.HostPathDirectory), // Ensure it's treated as a directory
 			),
 	)
 
-	// ✅ 添加 VolumeMount：将宿主机目录挂载到容器内
-	// ✅ mountPath 必须与 --model 参数和 MODEL 环境变量的值完全一致
+	// Mount the volume inside the container at the exact model path
 	container.WithVolumeMounts(
 		corev1apply.VolumeMount().
 			WithName("models").
-			WithMountPath(modelDirPath), // 容器内路径
+			WithMountPath(modelDirPath), // Must match --model argument
 	)
 
-	// ✅ 将容器加入 PodSpec
+	// Attach container to Pod spec
 	podSpec.WithContainers(container)
 
-	// ✅ 设置 Pod 模板 Spec
+	// Attach Pod spec to template
 	template.WithSpec(podSpec)
 
-	// 10. 将模板添加到spec
+	// Attach template to Deployment spec
 	spec.WithTemplate(template)
 	deploymentApply.WithSpec(spec)
 
-	// 11. 执行 Server-Side Apply
+	// Perform Server-Side Apply to create or update the Deployment
 	result, err := k.client.GetClientSet().AppsV1().Deployments("default").Apply(
 		context.Background(),
 		deploymentApply,
 		metav1.ApplyOptions{FieldManager: "modserv-shim", Force: true},
 	)
 	if err != nil {
-		return "", fmt.Errorf("部署应用失败: %w", err)
+		return "", fmt.Errorf("failed to deploy application: %w", err)
 	}
 
-	return fmt.Sprintf("应用 %s/%s 部署成功，使用hostNetwork并暴露端口 %d", result.Namespace, result.Name, randomPort), nil
+	return fmt.Sprintf("Deployment %s/%s succeeded with hostNetwork on port %d", result.Namespace, result.Name, randomPort), nil
 }
 
-// ptr 是一个辅助函数，用于创建 *string
-func ptr(s string) *string                                                { return &s }
-func (k *K8sShimlet) Delete(resourceId string) error                      { return nil }
+// ptr creates a pointer to a string value (helper for ApplyConfigurations).
+func ptr(s string) *string { return &s }
+
+// Delete removes deployed resources associated with the given resourceId.
+// In our implementation, resourceId corresponds to serviceId, which is used to find
+// and delete all Kubernetes Deployments labeled with this serviceId.
+func (k *K8sShimlet) Delete(resourceId string) error {
+	if k.client == nil {
+		return errors.New("K8s client is not initialized")
+	}
+
+	// Use label selector to find deployments with the given serviceId
+	labelSelector := labels.Set{"app": resourceId}.AsSelector().String()
+	opts := metav1.ListOptions{LabelSelector: labelSelector}
+
+	// List deployments with the specified serviceId
+	deployments, err := k.client.ListDeployments("default", opts)
+	if err != nil {
+		return fmt.Errorf("failed to list deployments for service %s: %w", resourceId, err)
+	}
+
+	// Delete each found deployment
+	for _, deployment := range deployments {
+		// Delete the deployment using Kubernetes API
+		err = k.client.GetClientSet().AppsV1().Deployments(deployment.Namespace).Delete(
+			context.Background(),
+			deployment.Name,
+			metav1.DeleteOptions{},
+		)
+		if err != nil {
+			// Continue deleting other deployments even if one fails
+			log.Error("Failed to delete deployment %s/%s: %v", deployment.Namespace, deployment.Name, err)
+		} else {
+			log.Info("Successfully deleted deployment %s/%s", deployment.Namespace, deployment.Name)
+		}
+	}
+
+	// If no deployments were found, consider it a success (already deleted)
+	if len(deployments) == 0 {
+		log.Info("No deployments found for service %s", resourceId)
+	}
+
+	return nil
+}
+
+// Status retrieves the current status of a deployed resource (not implemented).
 func (k *K8sShimlet) Status(resourceId string) (*dto.DeployStatus, error) { return nil, nil }
-func (k *K8sShimlet) Description() string                                 { return "k8s shimlet" }
+
+// Description returns a brief description of the shimlet.
+func (k *K8sShimlet) Description() string { return "k8s shimlet" }

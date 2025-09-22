@@ -8,25 +8,54 @@ import (
 	"time"
 )
 
-// Tracer 轻量级状态跟踪器
-// 直接维护协程上下文的map，无需额外的tracker层
+// 全局Tracer单例
+var (
+	globalTracer *Tracer
+	once         sync.Once
+)
+
+// GetGlobalTracer 获取全局Tracer单例实例
+func GetGlobalTracer() *Tracer {
+	once.Do(func() {
+		globalTracer = NewTracer()
+	})
+	return globalTracer
+}
+
+// Trace 静态方法，直接使用全局Tracer单例跟踪服务
+func Trace(serviceID string, shim shimlet.Shimlet, interval time.Duration) error {
+	return GetGlobalTracer().Trace(serviceID, shim, interval)
+}
+
+// Stop 静态方法，停止指定服务的跟踪
+func Stop(serviceID string) {
+	GetGlobalTracer().Stop(serviceID)
+}
+
+// StopAll 静态方法，停止所有服务的跟踪
+func StopAll() {
+	GetGlobalTracer().StopAll()
+}
+
+// Tracer Lightweight status tracker
+// Directly maintains a map of goroutine contexts without requiring an additional tracker layer
 
 type Tracer struct {
-	// 跟踪任务映射：serviceID -> 任务控制信息
+	// Tracking task map: serviceID -> task control information
 	tasks map[string]*taskControl
-	mu    sync.RWMutex // 保护tasks的读写锁
+	mu    sync.RWMutex // Read-write lock to protect tasks
 }
 
-// taskControl 封装单个跟踪任务的控制信息
-// 这是一个内部结构体，无需暴露给外部
+// taskControl Encapsulates control information for a single tracking task
+// This is an internal struct and does not need to be exposed externally
 
 type taskControl struct {
-	serviceID string             // 服务ID
-	shimlet   shimlet.Shimlet    // shimlet实例
-	cancel    context.CancelFunc // 协程取消函数
+	serviceID string             // Service ID
+	shimlet   shimlet.Shimlet    // Shimlet instance
+	cancel    context.CancelFunc // Goroutine cancellation function
 }
 
-// NewTracer 创建一个新的轻量级Tracer实例
+// NewTracer Creates a new lightweight Tracer instance
 
 func NewTracer() *Tracer {
 	return &Tracer{
@@ -34,10 +63,10 @@ func NewTracer() *Tracer {
 	}
 }
 
-// Trace 方法直接启动一个定时协程任务
-// serviceID: 服务实例ID
-// shim: 要调用的shimlet实例
-// interval: 状态检查间隔时间
+// Trace Method directly starts a scheduled goroutine task
+// serviceID: Service instance ID
+// shim: Shimlet instance to call
+// interval: Status check interval time
 
 func (t *Tracer) Trace(serviceID string, shim shimlet.Shimlet, interval time.Duration) error {
 	t.mu.Lock()
@@ -67,7 +96,7 @@ func (t *Tracer) Trace(serviceID string, shim shimlet.Shimlet, interval time.Dur
 	return nil
 }
 
-// 跟踪服务的协程函数，直接在Tracer中实现
+// Goroutine function for tracking service, implemented directly in Tracer
 func (t *Tracer) trackService(ctx context.Context, serviceID string, shim shimlet.Shimlet, interval time.Duration) {
 	// 确保在协程退出时清理资源
 	defer func() {
@@ -99,7 +128,7 @@ func (t *Tracer) trackService(ctx context.Context, serviceID string, shim shimle
 	}
 }
 
-// 执行服务状态检查
+// Performs service status check
 func (t *Tracer) checkServiceStatus(serviceID string, shim shimlet.Shimlet) {
 	// 调用传入的shimlet方法获取服务状态
 	status, err := shim.Status(serviceID)

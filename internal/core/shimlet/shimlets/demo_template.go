@@ -5,7 +5,7 @@ import (
 	dto "modserv-shim/internal/dto/deploy"
 )
 
-// 编译时检查 确保实现 shimlet 接口
+// Compile-time check to ensure shimlet interface is implemented
 var _ shimlet.Shimlet = (*TemplateShimlet)(nil)
 
 type TemplateShimlet struct {
