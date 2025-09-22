@@ -53,3 +53,43 @@ func (d *Orchestrator) Provision(spec *dto.DeploySpec) error {
 func getPipelineName() string {
 	return "opensource_llm"
 }
+
+// DeleteService 删除指定的模型服务
+func (d *Orchestrator) DeleteService(serviceID string) error {
+	// 获取当前使用的shimlet
+	currentShimletId := config.Get().CurrentShimlet
+	runtimeShimlet, err := d.ShimReg.GetSingleton(currentShimletId)
+	if err != nil {
+		log.Error("get runtime shimlet error", err)
+		return err
+	}
+
+	// 调用shimlet的Delete方法删除资源
+	if err := runtimeShimlet.Delete(serviceID); err != nil {
+		log.Error("delete service failed", err)
+		return err
+	}
+
+	log.Info("service deleted successfully", "serviceID", serviceID)
+	return nil
+}
+
+// GetServiceStatus 获取指定服务的状态信息
+func (d *Orchestrator) GetServiceStatus(serviceID string) (*dto.DeployStatus, error) {
+	// 获取当前使用的shimlet
+	currentShimletId := config.Get().CurrentShimlet
+	runtimeShimlet, err := d.ShimReg.GetSingleton(currentShimletId)
+	if err != nil {
+		log.Error("get runtime shimlet error", err)
+		return nil, err
+	}
+
+	// 调用shimlet的Status方法获取服务状态
+	status, err := runtimeShimlet.Status(serviceID)
+	if err != nil {
+		log.Error("get service status failed", err)
+		return nil, err
+	}
+
+	return status, nil
+}

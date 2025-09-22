@@ -205,6 +205,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 	// Set nodeSelector as a local variable
 	// This can be modified to match specific node requirements
 	nodeSelector := map[string]string{}
+	nodeSelector["kubernetes.io/hostname"] = "dx-l20-10.246.53.166.maas.cn"
 	// Example: To schedule on nodes with GPU label
 	// nodeSelector["nvidia.com/gpu.present"] = "true"
 	// Enable nodeSelector if it contains any key-value pairs
@@ -305,8 +306,72 @@ func (k *K8sShimlet) Delete(resourceId string) error {
 	return nil
 }
 
-// Status retrieves the current status of a deployed resource (not implemented).
-func (k *K8sShimlet) Status(resourceId string) (*dto.DeployStatus, error) { return nil, nil }
+// Status retrieves the current status of a deployed resource based on Kubernetes deployment state.
+func (k *K8sShimlet) Status(resourceId string) (*dto.DeployStatus, error) {
+	if k.client == nil {
+		return nil, errors.New("K8s client is not initialized")
+	}
+
+	// Use label selector to find deployments with the given resourceId (serviceId)
+	labelSelector := labels.Set{"app": resourceId}.AsSelector().String()
+	opts := metav1.ListOptions{LabelSelector: labelSelector}
+
+	// List deployments with the specified resourceId
+	deployments, err := k.client.ListDeployments("default", opts)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list deployments for resource %s: %w", resourceId, err)
+	}
+
+	// If no deployments found, return notExsit status
+	if len(deployments) == 0 {
+		return &dto.DeployStatus{
+			DeploySpec: dto.DeploySpec{ServiceId: resourceId},
+			Status:     dto.PhaseTerminated,
+		}, nil
+	}
+
+	// Get the first deployment (assuming one per serviceId)
+	deployment := deployments[0]
+
+	// Determine deployment status
+	var phase dto.DeployPhase
+	switch {
+	case deployment.Status.Replicas == 0:
+		phase = dto.PhaseTerminating
+	case deployment.Status.UnavailableReplicas > 0:
+		phase = dto.PhaseFailed
+	case deployment.Status.AvailableReplicas == deployment.Status.Replicas:
+		phase = dto.PhaseRunning
+	default:
+		phase = dto.PhasePending
+	}
+
+	// Extract model name and path from annotations or labels
+	modelName := "unknown"
+	modelPath := "unknown"
+
+	// Try to get model info from annotations
+	if val, ok := deployment.Annotations["modserv-shim/model-name"]; ok {
+		modelName = val
+	}
+	if val, ok := deployment.Annotations["modserv-shim/model-path"]; ok {
+		modelPath = val
+	}
+
+	// Build deploy spec
+	spec := dto.DeploySpec{
+		ServiceId:    resourceId,
+		ModelName:    modelName,
+		ModelFileDir: modelPath,
+		ReplicaCount: int(*deployment.Spec.Replicas),
+	}
+
+	return &dto.DeployStatus{
+		DeploySpec: spec,
+		Status:     phase,
+	},
+		nil
+}
 
 // Description returns a brief description of the shimlet.
 func (k *K8sShimlet) Description() string { return "k8s shimlet" }
