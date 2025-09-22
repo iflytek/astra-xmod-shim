@@ -38,6 +38,9 @@ func RegisterRoutes(server *http.Server) {
 						// 实现指标处理逻辑
 					})
 				}
+
+				// 删除服务路由
+				modserv.DELETE("/:serviceId", handler.DeleteService)
 			}
 		}
 	}

@@ -205,6 +205,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 	// Set nodeSelector as a local variable
 	// This can be modified to match specific node requirements
 	nodeSelector := map[string]string{}
+	nodeSelector["kubernetes.io/hostname"] = "dx-l20-10.246.53.166.maas.cn"
 	// Example: To schedule on nodes with GPU label
 	// nodeSelector["nvidia.com/gpu.present"] = "true"
 	// Enable nodeSelector if it contains any key-value pairs
