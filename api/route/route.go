@@ -41,6 +41,8 @@ func RegisterRoutes(server *http.Server) {
 
 				// 删除服务路由
 				modserv.DELETE("/:serviceId", handler.DeleteService)
+				// 获取服务状态路由
+				modserv.GET("/:serviceId", handler.GetServiceStatus)
 			}
 		}
 	}

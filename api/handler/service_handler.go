@@ -2,9 +2,10 @@ package handler
 
 import (
 	"modserv-shim/internal/core/orchestrator"
-	model "modserv-shim/internal/dto/deploy"
+	dto "modserv-shim/internal/dto/deploy"
 	"modserv-shim/pkg/log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,8 +18,21 @@ type DeleteServiceResponse struct {
 		ServiceID string `json:"serviceId"`
 	} `json:"data"`
 }
+
+// GetServiceStatusResponse 获取服务状态响应结构体
+type GetServiceStatusResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		ServiceID  string `json:"serviceId"`
+		Status     string `json:"status"`   // 运行中/阻塞中/失败/初始化中/不存在/停止中
+		Endpoint   string `json:"endpoint"` // openai like endpoint
+		UpdateTime string `json:"updateTime"`
+	} `json:"data"`
+}
+
 func DoDeploy(c *gin.Context) {
-	var depSpec *model.DeploySpec
+	var depSpec *dto.DeploySpec
 	if err := c.ShouldBindJSON(&depSpec); err != nil {
 		log.Error("解析策略请求失败: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -37,6 +51,81 @@ func DoDeploy(c *gin.Context) {
 		"message": "success",
 	})
 }
+
+// GetServiceStatus 处理获取模型服务状态的请求
+func GetServiceStatus(c *gin.Context) {
+	// 从URL路径中获取serviceId
+	serviceID := c.Param("serviceId")
+
+	if serviceID == "" {
+		log.Error("serviceId is required")
+		response := GetServiceStatusResponse{
+			Code:    1,
+			Message: "serviceId is required",
+		}
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	log.Info("Getting service status", "serviceID", serviceID)
+
+	// 调用orchestrator获取服务状态
+	status, err := orchestrator.GlobalOrchestrator.GetServiceStatus(serviceID)
+	if err != nil {
+		log.Error("Get service status failed", "error", err)
+		response := GetServiceStatusResponse{
+			Code:    1,
+			Message: "get service status failed",
+			Data: struct {
+				ServiceID  string `json:"serviceId"`
+				Status     string `json:"status"`
+				Endpoint   string `json:"endpoint"`
+				UpdateTime string `json:"updateTime"`
+			}{serviceID, "", "", ""},
+		}
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+
+	// 映射状态枚举到字符串
+	var statusStr string
+	switch status.Status {
+	case dto.PhaseRunning:
+		statusStr = "running"
+	case dto.PhasePending:
+		statusStr = "pending"
+	case dto.PhaseFailed:
+		statusStr = "failed"
+	case dto.PhaseCreating:
+		statusStr = "initializing"
+	case dto.PhaseTerminated:
+		statusStr = "notExsit"
+	case dto.PhaseTerminating:
+		statusStr = "terminating"
+	default:
+		statusStr = "unknown"
+	}
+
+	// 构建OpenAI风格的endpoint（实际应该从K8s服务或配置中获取）
+	endpoint := "http://localhost:8080/v1" // 示例值
+
+	// 获取当前时间
+	updateTime := time.Now().Format("2006-01-02 15:04:05")
+
+	// 返回成功响应
+	response := GetServiceStatusResponse{
+		Code:    0,
+		Message: "success",
+		Data: struct {
+			ServiceID  string `json:"serviceId"`
+			Status     string `json:"status"`
+			Endpoint   string `json:"endpoint"`
+			UpdateTime string `json:"updateTime"`
+		}{serviceID, statusStr, endpoint, updateTime},
+	}
+	c.JSON(http.StatusOK, response)
+}
+
 // DeleteService 处理删除模型服务的请求
 func DeleteService(c *gin.Context) {
 	// 从URL路径中获取serviceId
