@@ -22,7 +22,7 @@ func (k *TemplateShimlet) Apply(spec *dto.DeploySpec) (resourceId string, err er
 	return "", err
 }
 func (k *TemplateShimlet) Delete(resourceId string) (err error) { return nil }
-func (k *TemplateShimlet) Status(resourceId string) (status *dto.DeployStatus, err error) {
+func (k *TemplateShimlet) Status(resourceId string) (status *dto.RuntimeStatus, err error) {
 	return nil, err
 }
 func (k *TemplateShimlet) Description() string {

@@ -49,7 +49,7 @@ func Init(configPath string) error {
 	shim, _ := shimReg.GetSingleton(cfg.CurrentShimlet)
 
 	// Trace 已部署的服务
-	err := statusTracer.Init(shim, 10)
+	err := statusTracer.Init(shim, 30)
 	if err != nil {
 		return err
 	}

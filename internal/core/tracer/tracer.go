@@ -108,7 +108,7 @@ func (t *Tracer) checkStatus(serviceID string, shim shimlet.Shimlet) {
 	}
 	// 状态变化，更新缓存并发布事件
 
-	t.eventBus.Publish("service.status", &eventbus2.ServiceEvent{ServiceID: serviceID, To: status.Status})
+	t.eventBus.Publish("service.status", &eventbus2.ServiceEvent{ServiceID: serviceID, To: status.Status, EndPoint: status.EndPoint})
 	log.Debug("Status of %s: %+v", serviceID, status)
 }
 

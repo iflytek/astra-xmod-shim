@@ -12,7 +12,7 @@ type Shimlet interface {
 	InitWithConfig(confPath string) error
 	Apply(spec *dto.DeploySpec) (resourceId string, err error)
 	Delete(resourceId string) error
-	Status(resourceId string) (status *dto.DeployStatus, err error)
+	Status(resourceId string) (status *dto.RuntimeStatus, err error)
 	ID() (name string)
 	Description() string
 	// ListDeployedServices 获取所有已部署的服务列表

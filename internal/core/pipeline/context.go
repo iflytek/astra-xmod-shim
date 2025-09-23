@@ -3,6 +3,7 @@ package pipeline
 import (
 	"modserv-shim/internal/core/eventbus"
 	"modserv-shim/internal/core/shimlet"
+	"modserv-shim/internal/core/tracer"
 	dto "modserv-shim/internal/dto/deploy"
 )
 
@@ -11,6 +12,7 @@ type Context struct {
 	Shimlet    shimlet.Shimlet
 	DeploySpec *dto.DeploySpec
 	EventBus   eventbus.EventBus
+	Tracer     *tracer.Tracer
 	ResourceId string
 }
 

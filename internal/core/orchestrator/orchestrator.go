@@ -67,6 +67,8 @@ func (o *Orchestrator) Provision(spec *dto.DeploySpec) error {
 		Shimlet:    runtimeShimlet,
 		DeploySpec: spec,
 		EventBus:   o.eventBus,
+		ResourceId: spec.ServiceId,
+		Tracer:     o.tracer,
 		Data:       make(map[string]any),
 	}
 	// 4. 执行pipeline
@@ -109,14 +111,14 @@ func (o *Orchestrator) DeleteService(serviceID string) error {
 }
 
 // GetServiceStatus 获取指定服务的状态信息
-func (o *Orchestrator) GetServiceStatus(serviceID string) (dto.DeployPhase, error) {
+func (o *Orchestrator) GetServiceStatus(serviceID string) (*dto.RuntimeStatus, error) {
 	if serviceID == "" {
-		return "", fmt.Errorf("serviceID is required")
+		return nil, fmt.Errorf("serviceID is required")
 	}
 
-	phase := o.stateManager.Get(serviceID)
+	runtimeStat := o.stateManager.GetStatus(serviceID)
 
 	// 如果没找到，可以返回“不存在”，或 fallback 到远程查询（可选）
 
-	return phase, nil
+	return runtimeStat, nil
 }

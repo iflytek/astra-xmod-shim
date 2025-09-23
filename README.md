@@ -16,7 +16,7 @@ ModelServeShim adopts a "core logic + dual plugins" decoupled design architectur
 3. **Pipeline Engine**: Manages various stages and steps of model deployment
 4. **Plugin Management System**: Handles loading, unloading, and lifecycle management of plugins
 
-![Architecture Diagram]()
+![Architecture Diagram](img.png)
 
 ### Core Component Description
 - **Core Engine**: Processes API requests, manages service states, and coordinates the work of various components
