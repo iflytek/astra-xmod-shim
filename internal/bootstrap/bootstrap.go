@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"modserv-shim/api/server"
 	"modserv-shim/internal/config"
+	"modserv-shim/internal/core/eventbus"
 	"modserv-shim/internal/core/orchestrator"
 	"modserv-shim/internal/core/pipeline"
 	"modserv-shim/internal/core/shimlet"
 	_ "modserv-shim/internal/core/shimlet/shimlets"
+	"modserv-shim/internal/core/statemanager"
 	"modserv-shim/internal/core/tracer"
 	"modserv-shim/pkg/log"
 	"sync"
@@ -28,15 +30,22 @@ func Init(configPath string) error {
 	}
 	log.Info("log configured", "cfg: ", cfg.Log)
 
-	// registry already initialed from init()
+	// shimlet registry already initialed from init()
 	shimReg := shimlet.Registry
 	pipeReg := pipeline.Registry
 
-	orchestrator.GlobalOrchestrator = &orchestrator.Orchestrator{ShimReg: shimReg, PipeReg: pipeReg}
+	// init eventbus (use asaskevich impl)
+	eventbusInstance := &eventbus.AsaskevichEventBus{}
 
 	// 初始化全局Tracer单例
-	tracer.GetGlobalTracer()
+	statusTracer := tracer.GetGlobalTracer()
 	log.Info("Global tracer initialized")
+
+	// TODO init stateManager(FSM)
+	stateMgr := statemanager.New()
+
+	// init orchestrator
+	orchestrator.GlobalOrchestrator = orchestrator.NewOrchestrator(shimReg, pipeReg, eventbusInstance, statusTracer, stateMgr)
 
 	// 6. 初始化 HTTP Server
 	if err := server.Init(); err != nil {

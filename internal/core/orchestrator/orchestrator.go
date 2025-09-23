@@ -3,33 +3,62 @@ package orchestrator
 import (
 	"fmt"
 	"modserv-shim/internal/config"
+	"modserv-shim/internal/core/eventbus"
 	"modserv-shim/internal/core/pipeline"
 	_ "modserv-shim/internal/core/pipeline/pipelines"
 	"modserv-shim/internal/core/shimlet"
+	"modserv-shim/internal/core/statemanager"
+	"modserv-shim/internal/core/tracer"
 	"modserv-shim/internal/core/typereg"
 	dto "modserv-shim/internal/dto/deploy"
+	eventbus2 "modserv-shim/internal/dto/eventbus"
 	"modserv-shim/pkg/log"
 )
 
 type Orchestrator struct {
-	ShimReg *typereg.TypeReg[shimlet.Shimlet]
-	PipeReg map[string]*pipeline.Pipeline
+	shimReg      *typereg.TypeReg[shimlet.Shimlet]
+	pipeReg      map[string]*pipeline.Pipeline
+	eventBus     eventbus.EventBus
+	stateManager *statemanager.StateManager
+	tracer       *tracer.Tracer
+}
+
+func NewOrchestrator(
+	shimReg *typereg.TypeReg[shimlet.Shimlet],
+	pipeReg map[string]*pipeline.Pipeline,
+	eventBus eventbus.EventBus,
+	tracer *tracer.Tracer,
+	stateManager *statemanager.StateManager,
+) *Orchestrator {
+	return &Orchestrator{
+		shimReg:      shimReg,
+		pipeReg:      pipeReg,
+		eventBus:     eventBus,
+		tracer:       tracer,
+		stateManager: stateManager,
+	}
 }
 
 var GlobalOrchestrator *Orchestrator
 
-func (d *Orchestrator) Provision(spec *dto.DeploySpec) error {
+func (o *Orchestrator) Provision(spec *dto.DeploySpec) error {
+
+	// 兜底事件：开始部署
+	o.eventBus.Publish("service.status", &eventbus2.ServiceEvent{
+		ServiceID: spec.ServiceId,
+		To:        dto.PhaseCreating,
+	})
+
 	// 覆盖掉 nvidia.com/gpu 的 limit
 	spec.ResourceRequirements.AcceleratorType = "nvidia.com/gpu"
-	
-	runtimePipe := pipeline.Registry[getPipelineName()]
+
+	runtimePipe := o.pipeReg[getPipelineName()]
 	if runtimePipe == nil {
 		return fmt.Errorf("pipeline %s not found", getPipelineName())
 	}
 
-	// TODO 调用对应 shimlet 执行部署操作
 	currentShimletId := config.Get().CurrentShimlet
-	runtimeShimlet, err := d.ShimReg.GetSingleton(currentShimletId)
+	runtimeShimlet, err := o.shimReg.GetSingleton(currentShimletId)
 	if err != nil {
 		log.Error("get runtime shimlet error", err)
 		return err
@@ -37,11 +66,16 @@ func (d *Orchestrator) Provision(spec *dto.DeploySpec) error {
 	pipeCtx := &pipeline.Context{
 		Shimlet:    runtimeShimlet,
 		DeploySpec: spec,
+		EventBus:   o.eventBus,
 		Data:       make(map[string]any),
 	}
 	// 4. 执行pipeline
 	if err := runtimePipe.Execute(pipeCtx); err != nil {
-		log.Error("pipeline execution failed", err)
+		// 兜底事件：失败
+		o.eventBus.Publish("service.status", &eventbus2.ServiceEvent{
+			ServiceID: spec.ServiceId,
+			To:        dto.PhaseFailed,
+		})
 		return err
 	}
 
@@ -55,10 +89,10 @@ func getPipelineName() string {
 }
 
 // DeleteService 删除指定的模型服务
-func (d *Orchestrator) DeleteService(serviceID string) error {
+func (o *Orchestrator) DeleteService(serviceID string) error {
 	// 获取当前使用的shimlet
 	currentShimletId := config.Get().CurrentShimlet
-	runtimeShimlet, err := d.ShimReg.GetSingleton(currentShimletId)
+	runtimeShimlet, err := o.shimReg.GetSingleton(currentShimletId)
 	if err != nil {
 		log.Error("get runtime shimlet error", err)
 		return err
@@ -75,21 +109,14 @@ func (d *Orchestrator) DeleteService(serviceID string) error {
 }
 
 // GetServiceStatus 获取指定服务的状态信息
-func (d *Orchestrator) GetServiceStatus(serviceID string) (*dto.DeployStatus, error) {
-	// 获取当前使用的shimlet
-	currentShimletId := config.Get().CurrentShimlet
-	runtimeShimlet, err := d.ShimReg.GetSingleton(currentShimletId)
-	if err != nil {
-		log.Error("get runtime shimlet error", err)
-		return nil, err
+func (o *Orchestrator) GetServiceStatus(serviceID string) (dto.DeployPhase, error) {
+	if serviceID == "" {
+		return "", fmt.Errorf("serviceID is required")
 	}
 
-	// 调用shimlet的Status方法获取服务状态
-	status, err := runtimeShimlet.Status(serviceID)
-	if err != nil {
-		log.Error("get service status failed", err)
-		return nil, err
-	}
+	phase := o.stateManager.Get(serviceID)
 
-	return status, nil
+	// 如果没找到，可以返回“不存在”，或 fallback 到远程查询（可选）
+
+	return phase, nil
 }

@@ -3,6 +3,7 @@ module modserv-shim
 go 1.24.7
 
 require (
+	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
 	github.com/gin-gonic/gin v1.10.1
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
