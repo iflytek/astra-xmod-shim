@@ -20,7 +20,7 @@ server:
 # 日志配置
 log:
   # 日志级别（debug/info/warn/error）
-  level: "info"
+  level: "debug"
   # 日志文件输出路径（相对或绝对路径）
   path: "./logs/app.log"
   # 单个日志文件最大尺寸（MB），超过则滚动生成新文件
@@ -48,3 +48,8 @@ shimlets:
 
 model-manage:
   model-root: "/mnt/maasmodels/"
+
+# 跟踪器配置
+tracer:
+  # 跟踪器轮询间隔（秒）
+  interval: 30
