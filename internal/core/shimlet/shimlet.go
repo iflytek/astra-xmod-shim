@@ -15,4 +15,6 @@ type Shimlet interface {
 	Status(resourceId string) (status *dto.DeployStatus, err error)
 	ID() (name string)
 	Description() string
+	// ListDeployedServices 获取所有已部署的服务列表
+	ListDeployedServices() ([]string, error)
 }

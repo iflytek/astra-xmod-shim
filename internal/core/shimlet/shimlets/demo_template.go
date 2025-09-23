@@ -28,3 +28,9 @@ func (k *TemplateShimlet) Status(resourceId string) (status *dto.DeployStatus, e
 func (k *TemplateShimlet) Description() string {
 	return "k8s shimlet"
 }
+
+// ListDeployedServices 获取所有已部署的服务列表
+// 这是一个示例实现，实际应用中需要根据具体shimlet类型实现
+func (k *TemplateShimlet) ListDeployedServices() ([]string, error) {
+	return []string{}, nil
+}

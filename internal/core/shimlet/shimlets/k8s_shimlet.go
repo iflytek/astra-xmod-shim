@@ -226,7 +226,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 			WithName("models").
 			WithHostPath(
 				corev1apply.HostPathVolumeSource().
-					WithPath(modelDirPath).             // Host machine path
+					WithPath(modelDirPath). // Host machine path
 					WithType(corev1.HostPathDirectory), // Ensure it's treated as a directory
 			),
 	)
@@ -367,11 +367,46 @@ func (k *K8sShimlet) Status(resourceId string) (*dto.DeployStatus, error) {
 	}
 
 	return &dto.DeployStatus{
-		DeploySpec: spec,
-		Status:     phase,
-	},
+			DeploySpec: spec,
+			Status:     phase,
+		},
 		nil
 }
 
 // Description returns a brief description of the shimlet.
 func (k *K8sShimlet) Description() string { return "k8s shimlet" }
+
+// ListDeployedServices 获取所有已部署的服务列表
+// 这个方法查询Kubernetes集群中所有由modserv-shim管理的部署，并提取对应的serviceId
+func (k *K8sShimlet) ListDeployedServices() ([]string, error) {
+	if k.client == nil {
+		return []string{}, fmt.Errorf("k8s client is not initialized")
+	}
+
+	// 准备ListOptions，筛选由modserv-shim管理的部署
+	listOptions := metav1.ListOptions{
+		LabelSelector: labels.Set{"managed-by": "modserv-shim"}.AsSelector().String(),
+	}
+
+	// 调用ListDeployments方法获取所有由modserv-shim管理的部署
+	deployments, err := k.client.ListDeployments("default", listOptions)
+	if err != nil {
+		return []string{}, fmt.Errorf("failed to list deployments: %w", err)
+	}
+
+	// 从部署中提取serviceId
+	var serviceIDs []string
+	for _, deployment := range deployments {
+		// 检查deployment是否有modserv-shim/service-id注解
+		if serviceID, exists := deployment.Annotations["modserv-shim/service-id"]; exists && serviceID != "" {
+			serviceIDs = append(serviceIDs, serviceID)
+		} else {
+			// 尝试从标签中获取serviceId
+			if appLabel, exists := deployment.Labels["app"]; exists && appLabel != "" {
+				serviceIDs = append(serviceIDs, appLabel)
+			}
+		}
+	}
+
+	return serviceIDs, nil
+}

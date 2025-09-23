@@ -5,6 +5,7 @@ import (
 	"modserv-shim/api/server"
 	"modserv-shim/internal/config"
 	"modserv-shim/internal/core/eventbus"
+	"modserv-shim/internal/core/eventbus/subscriptions"
 	"modserv-shim/internal/core/orchestrator"
 	"modserv-shim/internal/core/pipeline"
 	"modserv-shim/internal/core/shimlet"
@@ -34,15 +35,26 @@ func Init(configPath string) error {
 	shimReg := shimlet.Registry
 	pipeReg := pipeline.Registry
 
-	// init eventbus (use asaskevich impl)
-	eventbusInstance := &eventbus.AsaskevichEventBus{}
-
-	// 初始化全局Tracer单例
-	statusTracer := tracer.GetGlobalTracer()
-	log.Info("Global tracer initialized")
-
 	// TODO init stateManager(FSM)
 	stateMgr := statemanager.New()
+
+	// init eventbus (default use asaskevich impl)
+	eventbusInstance := eventbus.NewAsaskevichEventBus()
+
+	// init eventbus subscriptions
+	subscriptions.Setup(eventbusInstance, stateMgr)
+
+	// 初始化全局Tracer单例
+	statusTracer := tracer.New(eventbusInstance)
+	shim, _ := shimReg.GetSingleton(cfg.CurrentShimlet)
+
+	// Trace 已部署的服务
+	err := statusTracer.Init(shim, 10)
+	if err != nil {
+		return err
+	}
+
+	log.Info("Global tracer initialized")
 
 	// init orchestrator
 	orchestrator.GlobalOrchestrator = orchestrator.NewOrchestrator(shimReg, pipeReg, eventbusInstance, statusTracer, stateMgr)

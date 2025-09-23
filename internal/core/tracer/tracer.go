@@ -1,171 +1,146 @@
+// Package tracer provides a service status tracker.
+// It does NOT include global state or static methods.
+// You control the lifecycle of the Tracer instance.
 package tracer
 
 import (
 	"context"
+	"modserv-shim/internal/core/eventbus"
 	"modserv-shim/internal/core/shimlet"
+	eventbus2 "modserv-shim/internal/dto/eventbus"
 	"modserv-shim/pkg/log"
 	"sync"
 	"time"
 )
 
-// 全局Tracer单例
-var (
-	globalTracer *Tracer
-	once         sync.Once
-)
-
-// GetGlobalTracer 获取全局Tracer单例实例
-func GetGlobalTracer() *Tracer {
-	once.Do(func() {
-		globalTracer = NewTracer()
-	})
-	return globalTracer
-}
-
-// Trace 静态方法，直接使用全局Tracer单例跟踪服务
-func Trace(serviceID string, shim shimlet.Shimlet, interval time.Duration) error {
-	return GetGlobalTracer().Trace(serviceID, shim, interval)
-}
-
-// Stop 静态方法，停止指定服务的跟踪
-func Stop(serviceID string) {
-	GetGlobalTracer().Stop(serviceID)
-}
-
-// StopAll 静态方法，停止所有服务的跟踪
-func StopAll() {
-	GetGlobalTracer().StopAll()
-}
-
-// Tracer Lightweight status tracker
-// Directly maintains a map of goroutine contexts without requiring an additional tracker layer
-
+// Tracer is a lightweight status tracker for deployed services.
 type Tracer struct {
-	// Tracking task map: serviceID -> task control information
-	tasks map[string]*taskControl
-	mu    sync.RWMutex // Read-write lock to protect tasks
+	tasks    map[string]context.CancelFunc // serviceID -> cancel
+	eventBus eventbus.EventBus
+	mu       sync.RWMutex
 }
 
-// taskControl Encapsulates control information for a single tracking task
-// This is an internal struct and does not need to be exposed externally
-
-type taskControl struct {
-	serviceID string             // Service ID
-	shimlet   shimlet.Shimlet    // Shimlet instance
-	cancel    context.CancelFunc // Goroutine cancellation function
-}
-
-// NewTracer Creates a new lightweight Tracer instance
-
-func NewTracer() *Tracer {
+// New creates a new Tracer instance.
+func New(eventbus eventbus.EventBus) *Tracer {
 	return &Tracer{
-		tasks: make(map[string]*taskControl),
+		eventBus: eventbus,
+		tasks:    make(map[string]context.CancelFunc),
 	}
 }
 
-// Trace Method directly starts a scheduled goroutine task
-// serviceID: Service instance ID
-// shim: Shimlet instance to call
-// interval: Status check interval time
-
-func (t *Tracer) Trace(serviceID string, shim shimlet.Shimlet, interval time.Duration) error {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-
-	// 检查服务是否已经在跟踪中
-	if _, exists := t.tasks[serviceID]; exists {
-		log.Warn("Service is already being tracked: %s", serviceID)
+// Init initializes the Tracer and starts tracking existing services.
+// You must explicitly call this at startup if you want to recover tracking.
+func (t *Tracer) Init(shim shimlet.Shimlet, interval time.Duration) error {
+	if shim == nil {
 		return nil
 	}
 
-	// 创建协程上下文和取消函数
-	ctx, cancel := context.WithCancel(context.Background())
-
-	// 保存任务控制信息
-	t.tasks[serviceID] = &taskControl{
-		serviceID: serviceID,
-		shimlet:   shim,
-		cancel:    cancel,
+	serviceIDs, err := shim.ListDeployedServices()
+	if err != nil {
+		log.Warn("Tracer.Init: failed to list deployed services: %v", err)
 	}
 
-	// 启动跟踪协程
-	go t.trackService(ctx, serviceID, shim, interval)
+	for _, serviceID := range serviceIDs {
+		_ = t.Trace(serviceID, shim, interval)
+	}
 
-	log.Info("Started tracking service: %s with shimlet: %s, interval: %v",
-		serviceID, shim.ID(), interval)
+	log.Info("Tracer.Init: recovered tracking for %d services", len(serviceIDs))
 	return nil
 }
 
-// Goroutine function for tracking service, implemented directly in Tracer
+// Trace starts tracking a service with periodic status checks.
+// If already tracked, it returns nil (idempotent).
+func (t *Tracer) Trace(serviceID string, shim shimlet.Shimlet, interval time.Duration) error {
+	if serviceID == "" || shim == nil {
+		return nil
+	}
+
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	if _, exists := t.tasks[serviceID]; exists {
+		log.Debug("Service already tracked, skipping: %s", serviceID)
+		return nil
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	t.tasks[serviceID] = cancel
+
+	go t.trackService(ctx, serviceID, shim, interval)
+	log.Info("Started tracking service: %s", serviceID)
+	return nil
+}
+
+// trackService runs in a goroutine to check service status periodically.
 func (t *Tracer) trackService(ctx context.Context, serviceID string, shim shimlet.Shimlet, interval time.Duration) {
-	// 确保在协程退出时清理资源
 	defer func() {
-		// 从任务映射中移除
 		t.mu.Lock()
 		delete(t.tasks, serviceID)
 		t.mu.Unlock()
-
 		log.Info("Stopped tracking service: %s", serviceID)
 	}()
 
-	// 创建定时器
+	if interval < time.Second {
+		interval = time.Second
+	}
+
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	// 立即执行一次状态检查
-	t.checkServiceStatus(serviceID, shim)
+	t.checkStatus(serviceID, shim)
 
-	// 循环执行定时检查
 	for {
 		select {
 		case <-ctx.Done():
-			// 收到取消信号，退出协程
 			return
 		case <-ticker.C:
-			// 定时器触发，执行状态检查
-			t.checkServiceStatus(serviceID, shim)
+			t.checkStatus(serviceID, shim)
 		}
 	}
 }
 
-// Performs service status check
-func (t *Tracer) checkServiceStatus(serviceID string, shim shimlet.Shimlet) {
-	// 调用传入的shimlet方法获取服务状态
+// checkStatus queries and logs the current status of a service.
+func (t *Tracer) checkStatus(serviceID string, shim shimlet.Shimlet) {
 	status, err := shim.Status(serviceID)
 	if err != nil {
-		log.Error("Failed to get status for service %s: %v", serviceID, err)
+		log.Error("Status check failed for %s: %v", serviceID, err)
+		return
+	}
+	// 状态变化，更新缓存并发布事件
+
+	t.eventBus.Publish("service.status", &eventbus2.ServiceEvent{ServiceID: serviceID, To: status.Status})
+	log.Debug("Status of %s: %+v", serviceID, status)
+}
+
+// Stop stops tracking a specific service.
+func (t *Tracer) Stop(serviceID string) {
+	if serviceID == "" {
 		return
 	}
 
-	// 处理获取到的状态信息
-	log.Debug("Service %s status: %+v", serviceID, status)
-
-	// 这里可以根据实际需求添加状态处理逻辑
-}
-
-// Stop 停止指定服务的跟踪
-func (t *Tracer) Stop(serviceID string) {
-	t.mu.RLock()
-	task, exists := t.tasks[serviceID]
-	t.mu.RUnlock()
+	t.mu.Lock()
+	cancel, exists := t.tasks[serviceID]
+	if exists {
+		delete(t.tasks, serviceID)
+	}
+	t.mu.Unlock()
 
 	if exists {
-		// 发送取消信号
-		task.cancel()
+		cancel()
 	}
 }
 
-// StopAll 停止所有服务的跟踪
+// StopAll stops tracking all services.
 func (t *Tracer) StopAll() {
-	t.mu.RLock()
-	tasksCopy := make([]*taskControl, 0, len(t.tasks))
-	for _, task := range t.tasks {
-		tasksCopy = append(tasksCopy, task)
+	t.mu.Lock()
+	var cancels []context.CancelFunc
+	for _, cancel := range t.tasks {
+		cancels = append(cancels, cancel)
 	}
-	t.mu.RUnlock()
+	t.tasks = make(map[string]context.CancelFunc)
+	t.mu.Unlock()
 
-	// 取消所有任务
-	for _, task := range tasksCopy {
-		task.cancel()
+	for _, cancel := range cancels {
+		cancel()
 	}
 }
