@@ -226,7 +226,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 			WithName("models").
 			WithHostPath(
 				corev1apply.HostPathVolumeSource().
-					WithPath(modelDirPath). // Host machine path
+					WithPath(modelDirPath).             // Host machine path
 					WithType(corev1.HostPathDirectory), // Ensure it's treated as a directory
 			),
 	)
@@ -307,7 +307,8 @@ func (k *K8sShimlet) Delete(resourceId string) error {
 }
 
 // Status retrieves the current status of a deployed resource based on Kubernetes deployment state.
-func (k *K8sShimlet) Status(resourceId string) (*dto.DeployStatus, error) {
+// Status retrieves the current status of a deployed resource and its endpoint.
+func (k *K8sShimlet) Status(resourceId string) (*dto.RuntimeStatus, error) {
 	if k.client == nil {
 		return nil, errors.New("K8s client is not initialized")
 	}
@@ -322,9 +323,9 @@ func (k *K8sShimlet) Status(resourceId string) (*dto.DeployStatus, error) {
 		return nil, fmt.Errorf("failed to list deployments for resource %s: %w", resourceId, err)
 	}
 
-	// If no deployments found, return notExsit status
+	// If no deployments found, return terminated status
 	if len(deployments) == 0 {
-		return &dto.DeployStatus{
+		return &dto.RuntimeStatus{
 			DeploySpec: dto.DeploySpec{ServiceId: resourceId},
 			Status:     dto.PhaseTerminated,
 		}, nil
@@ -350,7 +351,6 @@ func (k *K8sShimlet) Status(resourceId string) (*dto.DeployStatus, error) {
 	modelName := "unknown"
 	modelPath := "unknown"
 
-	// Try to get model info from annotations
 	if val, ok := deployment.Annotations["modserv-shim/model-name"]; ok {
 		modelName = val
 	}
@@ -358,19 +358,79 @@ func (k *K8sShimlet) Status(resourceId string) (*dto.DeployStatus, error) {
 		modelPath = val
 	}
 
+	// Extract replica count
+	replicaCount := int(*deployment.Spec.Replicas)
+
+	// 🌟 新增：从 PodTemplate 中提取容器端口（即 NodePort）
+	var nodePort int32 = 0
+	if deployment.Spec.Template.Spec.Containers != nil && len(deployment.Spec.Template.Spec.Containers) > 0 {
+		for _, c := range deployment.Spec.Template.Spec.Containers {
+			if c.Ports != nil {
+				for _, p := range c.Ports {
+					if p.Name == "http" {
+						nodePort = p.ContainerPort
+						break
+					}
+				}
+			}
+			if nodePort != 0 {
+				break
+			}
+		}
+	}
+
+	// 新增：获取任一运行中的 Pod 的 Node IP
+	var nodeIP string
+	if nodePort != 0 {
+		// 列出该 Deployment 的所有 Pod
+		podListOptions := metav1.ListOptions{
+			LabelSelector: labels.Set{"app": resourceId}.AsSelector().String(),
+		}
+		pods, err := k.client.GetClientSet().CoreV1().Pods("default").List(context.Background(), podListOptions)
+		if err != nil {
+			log.Warn("Failed to list pods for deployment %s: %v", deployment.Name, err)
+		} else {
+			for _, pod := range pods.Items {
+				if pod.Spec.NodeName != "" && pod.Status.Phase == corev1.PodRunning {
+					// 获取 Node 对象
+					node, err := k.client.GetClientSet().CoreV1().Nodes().Get(context.Background(), pod.Spec.NodeName, metav1.GetOptions{})
+					if err != nil {
+						continue
+					}
+					// 查找 InternalIP
+					for _, addr := range node.Status.Addresses {
+						if addr.Type == corev1.NodeInternalIP {
+							nodeIP = addr.Address
+							break
+						}
+					}
+					if nodeIP != "" {
+						break // 使用第一个运行中 Pod 的节点 IP
+					}
+				}
+			}
+		}
+	}
+
+	// 🌟 构造 endpoint
+	var endpoint string
+	if nodeIP != "" && nodePort != 0 {
+		endpoint = fmt.Sprintf("http://%s:%d", nodeIP, nodePort)
+	}
+
 	// Build deploy spec
 	spec := dto.DeploySpec{
 		ServiceId:    resourceId,
 		ModelName:    modelName,
 		ModelFileDir: modelPath,
-		ReplicaCount: int(*deployment.Spec.Replicas),
+		ReplicaCount: replicaCount,
 	}
 
-	return &dto.DeployStatus{
-			DeploySpec: spec,
-			Status:     phase,
-		},
-		nil
+	return &dto.RuntimeStatus{
+		DeploySpec: spec,
+		Status:     phase,
+		EndPoint:   endpoint, // ✅ 返回 endpoint
+	}, nil
 }
 
 // Description returns a brief description of the shimlet.

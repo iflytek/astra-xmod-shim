@@ -4,6 +4,7 @@ import (
 	"modserv-shim/internal/core/orchestrator"
 	dto "modserv-shim/internal/dto/deploy"
 	"modserv-shim/pkg/log"
+	"modserv-shim/pkg/utils"
 	"net/http"
 	"time"
 
@@ -41,14 +42,19 @@ func DoDeploy(c *gin.Context) {
 		})
 		return
 	}
-
+	depSpec.ServiceId = utils.GenerateSimpleID()
 	err := orchestrator.GlobalOrchestrator.Provision(depSpec)
 	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    1,
+			"message": "deploy submit failed: " + err.Error(),
+		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code":    0,
-		"message": "success",
+		"message": "deploy submit success",
+		"data":    map[string]string{"serviceId": depSpec.ServiceId},
 	})
 }
 
@@ -88,7 +94,6 @@ func GetServiceStatus(c *gin.Context) {
 	}
 
 	// 构建OpenAI风格的endpoint（实际应该从K8s服务或配置中获取）
-	endpoint := "http://localhost:8080/v1" // 示例值
 
 	// 获取当前时间
 	updateTime := time.Now().Format("2006-01-02 15:04:05")
@@ -102,7 +107,7 @@ func GetServiceStatus(c *gin.Context) {
 			Status     string `json:"status"`
 			Endpoint   string `json:"endpoint"`
 			UpdateTime string `json:"updateTime"`
-		}{serviceID, string(status), endpoint, updateTime},
+		}{serviceID, string(status.Status), status.EndPoint, updateTime},
 	}
 	c.JSON(http.StatusOK, response)
 }

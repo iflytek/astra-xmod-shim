@@ -6,4 +6,5 @@ import dto "modserv-shim/internal/dto/deploy"
 type ServiceEvent struct {
 	ServiceID string
 	To        dto.DeployPhase
+	EndPoint  string
 }

@@ -5,7 +5,7 @@ package dto
 type DeployPhase string
 
 const (
-	PhaseUnknown     DeployPhase = "unknown" // ✅ 新增
+	PhaseUnknown     DeployPhase = "unknown" // 新增
 	PhasePending     DeployPhase = "pending"
 	PhaseCreating    DeployPhase = "creating"
 	PhaseRunning     DeployPhase = "running"
@@ -13,3 +13,10 @@ const (
 	PhaseTerminating DeployPhase = "terminating"
 	PhaseTerminated  DeployPhase = "terminated"
 )
+
+// RuntimeStatus 部署状态
+type RuntimeStatus struct {
+	DeploySpec DeploySpec  `json:"modelFile"`
+	Status     DeployPhase `json:"contextLength"`
+	EndPoint   string      `json:"endPoint"`
+}
