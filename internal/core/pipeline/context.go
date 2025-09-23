@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"modserv-shim/internal/core/eventbus"
 	"modserv-shim/internal/core/shimlet"
 	dto "modserv-shim/internal/dto/deploy"
 )
@@ -9,6 +10,7 @@ type Context struct {
 	Data       map[string]any // 存储键值对，比如 app_id, url 等
 	Shimlet    shimlet.Shimlet
 	DeploySpec *dto.DeploySpec
+	EventBus   eventbus.EventBus
 	ResourceId string
 }
 

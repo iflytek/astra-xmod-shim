@@ -87,25 +87,6 @@ func GetServiceStatus(c *gin.Context) {
 		return
 	}
 
-	// 映射状态枚举到字符串
-	var statusStr string
-	switch status.Status {
-	case dto.PhaseRunning:
-		statusStr = "running"
-	case dto.PhasePending:
-		statusStr = "pending"
-	case dto.PhaseFailed:
-		statusStr = "failed"
-	case dto.PhaseCreating:
-		statusStr = "initializing"
-	case dto.PhaseTerminated:
-		statusStr = "notExsit"
-	case dto.PhaseTerminating:
-		statusStr = "terminating"
-	default:
-		statusStr = "unknown"
-	}
-
 	// 构建OpenAI风格的endpoint（实际应该从K8s服务或配置中获取）
 	endpoint := "http://localhost:8080/v1" // 示例值
 
@@ -121,7 +102,7 @@ func GetServiceStatus(c *gin.Context) {
 			Status     string `json:"status"`
 			Endpoint   string `json:"endpoint"`
 			UpdateTime string `json:"updateTime"`
-		}{serviceID, statusStr, endpoint, updateTime},
+		}{serviceID, string(status), endpoint, updateTime},
 	}
 	c.JSON(http.StatusOK, response)
 }

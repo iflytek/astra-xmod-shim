@@ -5,11 +5,11 @@ package dto
 type DeployPhase string
 
 const (
-	PhasePending     DeployPhase = "PENDING"     // Initializing, waiting for scheduling
-	PhaseCreating    DeployPhase = "CREATING"    // Resource creation in progress
-	PhaseRunning     DeployPhase = "RUNNING"     // Deployment successful, running normally
-	PhaseUpdating    DeployPhase = "UPDATING"    // Configuration update in progress
-	PhaseFailed      DeployPhase = "FAILED"      // Deployment failed
-	PhaseTerminating DeployPhase = "TERMINATING" // Terminating/deleting in progress
-	PhaseTerminated  DeployPhase = "TERMINATED"  // Terminated/deleted
+	PhaseUnknown     DeployPhase = "unknown" // ✅ 新增
+	PhasePending     DeployPhase = "pending"
+	PhaseCreating    DeployPhase = "creating"
+	PhaseRunning     DeployPhase = "running"
+	PhaseFailed      DeployPhase = "failed"
+	PhaseTerminating DeployPhase = "terminating"
+	PhaseTerminated  DeployPhase = "terminated"
 )

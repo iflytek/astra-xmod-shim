@@ -45,7 +45,7 @@ func applyService(ctx *pipeline.Context) error {
 	return nil
 }
 
-func Track(ctx *pipeline.Context) error {
+func StartTracker(ctx *pipeline.Context) error {
 
 	// TODO: Call tracer to track status before deployment
 
@@ -69,6 +69,7 @@ func opensourceLLMPipeline() *pipeline.Pipeline {
 	return pipeline.New("opensource_llm").
 		Step(generateServiceId).
 		Step(mapModelNameToPath). // Step: Map model name to path
+		Step(StartTracker).
 		Step(applyService).
 		Step(exposeService).
 		BuildAndRegister()
