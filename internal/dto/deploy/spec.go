@@ -18,11 +18,6 @@ type DeploySpec struct {
 }
 
 type Env struct {
-	Key string
-	Val string
-}
-
-type EnvVar struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }

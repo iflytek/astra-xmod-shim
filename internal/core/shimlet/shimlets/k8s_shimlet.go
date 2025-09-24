@@ -150,7 +150,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 	for _, env := range deploySpec.Env {
 		envVar := &corev1apply.EnvVarApplyConfiguration{}
 		envVar.WithName(env.Key)
-		envVar.WithValue(env.Val)
+		envVar.WithValue(env.Value)
 		envVars = append(envVars, envVar)
 	}
 	container.WithEnv(envVars...)
@@ -226,7 +226,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 			WithName("models").
 			WithHostPath(
 				corev1apply.HostPathVolumeSource().
-					WithPath(modelDirPath).             // Host machine path
+					WithPath(modelDirPath). // Host machine path
 					WithType(corev1.HostPathDirectory), // Ensure it's treated as a directory
 			),
 	)
