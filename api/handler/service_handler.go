@@ -42,6 +42,7 @@ func DoDeploy(c *gin.Context) {
 		})
 		return
 	}
+
 	depSpec.ServiceId = utils.GenerateSimpleID()
 	err := orchestrator.GlobalOrchestrator.Provision(depSpec)
 	if err != nil {
@@ -153,4 +154,53 @@ func DeleteService(c *gin.Context) {
 		}{serviceID},
 	}
 	c.JSON(http.StatusOK, response)
+}
+
+// UpdateService 处理更新模型服务的请求
+func UpdateService(c *gin.Context) {
+	// 从URL路径中获取serviceId
+	serviceID := c.Param("serviceId")
+
+	if serviceID == "" {
+		log.Error("serviceId is required")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    1,
+			"message": "serviceId is required",
+		})
+		return
+	}
+
+	var depSpec *dto.DeploySpec
+	if err := c.ShouldBindJSON(&depSpec); err != nil {
+		log.Error("解析策略请求失败: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    1,
+			"message": "无效的请求参数: " + err.Error(),
+		})
+		return
+	}
+
+	// 使用URL中的serviceId，而不是生成新的
+	depSpec.ServiceId = serviceID
+
+	log.Info("Updating service", "serviceID", serviceID)
+
+	// 复用部署逻辑进行更新
+	err := orchestrator.GlobalOrchestrator.Provision(depSpec)
+	if err != nil {
+		log.Error("Update service failed", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    1,
+			"message": "update submit failed: " + err.Error(),
+			"data":    map[string]string{"serviceId": serviceID},
+		})
+		return
+	}
+
+	// 返回成功响应
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "update submit success",
+		"data":    map[string]string{"serviceId": serviceID},
+	})
 }
