@@ -1,11 +1,10 @@
-
-# ModelServeShim
+# Astra-xmod-shim
 
 A lightweight middleware for unified AI model serving orchestration.
 
 ## Overview
 
-ModelServeShim decouples *where* a model runs from *how* it is deployed. It uses **Shimlets** to abstract runtime environments and **Pipelines** to define deployment workflows—enabling consistent management across platforms.
+Astra-xmod-shim decouples *where* a model runs from *how* it is deployed. It uses **Shimlets** to abstract runtime environments and **Pipelines** to define deployment workflows—enabling consistent management across platforms.
 
 Designed for extensibility and minimal footprint, it runs as a single binary with no external dependencies.
 
