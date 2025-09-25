@@ -106,7 +106,7 @@ func (o *Orchestrator) DeleteService(serviceID string) error {
 		return err
 	}
 
-	log.Info("service deleted successfully", "serviceID", serviceID)
+	go log.Info("service deleted successfully", "serviceID", serviceID)
 	return nil
 }
 
