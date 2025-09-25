@@ -1,5 +1,10 @@
 # Astra-xmod-shim
+[![License](https://img.shields.io/badge/license-Apache_2.0-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/github/v/release/iflytek/astra-xmod-shim)](https://github.com/iflytek/astra-xmod-shim/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/iflytek/astra-xmod-shim/ci.yml)](https://github.com/iflytek/astra-xmod-shim/actions)
+[![Coverage](https://img.shields.io/codecov/c/github/iflytek/astra-xmod-shim)](https://codecov.io/gh/iflytek/astra-xmod-shim)
 
+<span style="font-size:0.9em; color:#586375;">**Language**: [English](README.md) | **简体中文**</span>
 ## 项目概述
 Astra-xmod-shim 是一款轻量级 AI 模型服务管控中间件，采用插件化架构设计，旨在简化大模型服务的部署、运维与全生命周期管理。
 
@@ -306,6 +311,12 @@ logging:
 2. 遵循项目代码规范（使用 pre-commit 进行代码风格检查）
 3. 提交代码前确保通过所有测试
 4. 提交 Pull Request，描述清楚所做的变更和解决的问题
+## 🌟 Star 历史
+
+<div align="center">
+  <img src="https://api.star-history.com/svg?repos=iflytek/astra-xmod-shim
+&type=Date" alt="Star History Chart" width="600">
+</div>
 
 ## 许可证
 ModelServeShim 使用 Apache License 2.0 许可证。
