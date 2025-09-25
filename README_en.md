@@ -11,6 +11,7 @@ Designed for extensibility and minimal footprint, it runs as a single binary wit
 ---
 
 ## Architecture
+![架构示意图](img.png)
 
 - **Core Engine**: Manages service lifecycle via a finite state machine (FSM), handles API requests, and coordinates plugins.
 - **Shimlet**: Adapts to runtime environments (e.g., Kubernetes, Docker) through a plugin interface.
