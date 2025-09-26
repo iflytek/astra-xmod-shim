@@ -1,25 +1,25 @@
-<div align="center">
 
-# Astra-xmod-shim
+
+# Astra-mod-shim
+<div align="center">
 
 [![License](https://img.shields.io/github/license/iflytek/astra-xmod-shim)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/iflytek/astra-xmod-shim?include_prereleases)](https://github.com/iflytek/astra-xmod-shim/releases)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/iflytek/astra-xmod-shim/ci.yml?branch=main)](https://github.com/iflytek/astra-xmod-shim/actions)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/iflytek/astra-xmod-shim)](go.mod)
 [![Coverage](https://img.shields.io/codecov/c/github/iflytek/astra-xmod-shim)](https://codecov.io/gh/iflytek/astra-xmod-shim)
-
+![Multi-Arch](https://img.shields.io/badge/Multi--Arch-linux%2Famd64%20%7C%20linux%2Farm64-blue?logo=docker)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Native-blue?logo=kubernetes&logoColor=white)](docs/k8s.md)
 [![Helm](https://img.shields.io/badge/Helm-Chart-blue?logo=helm&logoColor=white)](charts/)
 [![Cloud Native](https://img.shields.io/badge/Cloud-Native-blue?logo=cloudnative&logoColor=white)](https://cncf.io)
 [![Metrics](https://img.shields.io/badge/Metrics-Prometheus-green?logo=prometheus)](docs/metrics.md)
-
 [![Contributors](https://img.shields.io/github/contributors/iflytek/astra-xmod-shim)](https://github.com/iflytek/astra-xmod-shim/graphs/contributors)
 [![Stars](https://img.shields.io/github/stars/iflytek/astra-xmod-shim?style=social)](https://github.com/iflytek/astra-xmod-shim)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
 </div>
 
-<div align="center">
+
 
 Astra-xmod-shim 是一款轻量级 AI 模型服务管控中间件，采用插件化架构设计，旨在简化大模型服务的部署、运维与全生命周期管理。
 
@@ -27,7 +27,6 @@ Astra-xmod-shim 是一款轻量级 AI 模型服务管控中间件，采用插件
 
 <span style="font-size:0.9em; color:#586375;">**Language**: [English](README_en.md) | **简体中文**</span>
 
-</div>
 
 ## 项目概述
 Astra-xmod-shim 是一款轻量级 AI 模型服务管控中间件，采用插件化架构设计，旨在简化大模型服务的部署、运维与全生命周期管理。
