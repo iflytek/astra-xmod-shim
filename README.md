@@ -1,11 +1,19 @@
-<h1 style="font-size: 3em; color: #0366d6; margin-bottom: 0.2em;">
-  Astra-mod-shim
-</h1>
 <div align="center">
 
+<div style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+  <img src="logo.svg" alt="Astra-mod-shim Logo" width="150" />
 
+  <div style="text-align: left;">
+    <h1 style="margin: 0; font-size: 2.2em; color: #0366d6; white-space: nowrap;">
+      Astra-mod-shim
+    </h1>
+    <p style="margin: 0; font-size: 1em; color: #586375;">
+      Lightweight AI Model Serving Shim
+    </p>
+  </div>
+</div>
 
-<img src="logo.svg" alt="Astra-mod-shim Logo" width="200" />
+<br>
 
 [![License](https://img.shields.io/github/license/iflytek/astra-xmod-shim)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/iflytek/astra-xmod-shim?include_prereleases)](https://github.com/iflytek/astra-xmod-shim/releases)
