@@ -1,17 +1,12 @@
 <div align="center">
 
-<div style="display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-  <img src="logo.svg" alt="Astra-mod-shim Logo" width="150" />
-
-  <div style="text-align: left;">
-    <h1 style="margin: 0; font-size: 2.2em; color: #0366d6; white-space: nowrap;">
-      Astra-mod-shim
-    </h1>
-    <p style="margin: 0; font-size: 1em; color: #586375;">
-      Lightweight AI Model Serving Shim
-    </p>
-  </div>
-</div>
+  <span style="display:inline-block; vertical-align:middle;">
+    <img src="logo.svg" alt="Astra-mod-shim Logo" width="150" />
+  </span>
+  <span style="display:inline-block; vertical-align:middle; margin-left: 20px;">
+    <h1 style="margin: 0; font-size: 2.2em; color: #0366d6;">Astra-mod-shim</h1>
+    <p style="margin: 0; font-size: 1em; color: #586375;">Lightweight AI Model Serving Shim</p>
+  </span>
 
 <br>
 
