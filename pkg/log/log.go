@@ -1,13 +1,10 @@
+// Package log 封装 zap 日志库，专为云原生环境设计：仅输出结构化 JSON 到 stdout
 package log
 
 import (
-	"fmt"
 	"os"
-	"path/filepath"
 
 	config "modserv-shim/internal/dto/config"
-
-	"gopkg.in/natefinch/lumberjack.v2"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -25,50 +22,34 @@ func Init(cfg *config.LogConfig) error {
 		return err
 	}
 
-	// 2. 配置日志输出（文件+控制台）
+	// 2. 构建日志核心（仅输出到 stdout）
 	core := buildLogCore(cfg)
 
 	// 3. 配置日志选项（调用行号等）
 	options := buildZapOptions(cfg)
 
-	// 4. 初始化全局Logger
+	// 4. 初始化全局 Logger
 	globalLogger = zap.New(core, options...)
 	sugarLogger = globalLogger.Sugar()
 
 	return nil
 }
 
-// 为缺失的配置项设置默认值
+// setDefaultConfig 为缺失的配置项设置默认值
 func setDefaultConfig(cfg *config.LogConfig) error {
 	if cfg.Level == "" {
-		cfg.Level = "info" // 默认info级别
+		cfg.Level = "info" // 默认 info 级别
 	}
-	if cfg.MaxSize <= 0 {
-		cfg.MaxSize = 100 // 默认单个文件100MB
-	}
-	if cfg.MaxAge <= 0 {
-		cfg.MaxAge = 7 // 默认保留7天
-	}
-	// 确保日志目录存在
-	if err := os.MkdirAll(filepath.Dir(cfg.Path), 0755); err != nil {
-		return fmt.Errorf("创建日志目录失败: %w", err)
-	}
+	// 云原生环境下无需文件路径、MaxSize、MaxAge 等配置
 	return nil
 }
 
-// 构建日志核心（输出目标、编码、级别）
+// buildLogCore 构建日志核心：仅输出到 stdout，使用 JSON 编码
 func buildLogCore(cfg *config.LogConfig) zapcore.Core {
-	// 日志文件输出（带轮转）
-	fileWriter := &lumberjack.Logger{
-		Filename:  cfg.Path,
-		MaxSize:   cfg.MaxSize,
-		MaxAge:    cfg.MaxAge,
-		Compress:  cfg.Compress,
-		LocalTime: true,
-	}
-	fileSyncer := zapcore.AddSync(fileWriter)
+	// 使用 stdout 作为输出目标
+	consoleSyncer := zapcore.Lock(zapcore.AddSync(zapcore.Lock(os.Stdout)))
 
-	// 日志编码配置
+	// 日志编码配置（JSON 结构化日志）
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",
 		LevelKey:       "level",
@@ -76,52 +57,37 @@ func buildLogCore(cfg *config.LogConfig) zapcore.Core {
 		CallerKey:      "caller",
 		StacktraceKey:  "stack",
 		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.CapitalLevelEncoder, // 级别大写（INFO/WARN/ERROR）
-		EncodeTime:     zapcore.ISO8601TimeEncoder,  // 时间格式：2006-01-02T15:04:05.000Z0700
+		EncodeLevel:    zapcore.LowercaseLevelEncoder, // 小写级别（info/warn/error）
+		EncodeTime:     zapcore.ISO8601TimeEncoder,    // ISO8601 时间格式
 		EncodeDuration: zapcore.StringDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder, // 调用者信息简写（如pkg/file.go:123）
+		EncodeCaller:   zapcore.ShortCallerEncoder, // 简写调用者（file.go:line）
 	}
 
 	// 解析日志级别
 	level, err := zapcore.ParseLevel(cfg.Level)
 	if err != nil {
-		level = zapcore.InfoLevel // 非法级别默认info
+		level = zapcore.InfoLevel // 非法级别默认 info
 	}
 
-	// 构建核心（文件输出）
-	core := zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderConfig), // 结构化JSON格式
-		fileSyncer,
+	// 构建核心：仅输出到 stdout
+	return zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig), // JSON 格式
+		consoleSyncer,
 		level,
 	)
-
-	// 如果需要同时输出到控制台，添加控制台输出
-	if cfg.EnableConsole {
-		consoleSyncer := zapcore.Lock(os.Stdout)
-		consoleCore := zapcore.NewCore(
-			zapcore.NewConsoleEncoder(encoderConfig), // 控制台用易读格式
-			consoleSyncer,
-			level,
-		)
-		core = zapcore.NewTee(core, consoleCore) // 多输出源合并
-	}
-
-	return core
 }
 
-// 构建zap选项（调用行号等）
+// buildZapOptions 构建 zap 选项（调用行号等）
 func buildZapOptions(cfg *config.LogConfig) []zap.Option {
 	var options []zap.Option
 	if cfg.ShowLine {
 		options = append(options, zap.AddCaller())      // 显示调用者信息
-		options = append(options, zap.AddCallerSkip(1)) // 跳过当前包层级，显示真实调用位置
+		options = append(options, zap.AddCallerSkip(1)) // 跳过当前包层级
 	}
-	// 开发环境可添加堆栈跟踪（错误级别以上）
-	// options = append(options, zap.AddStacktrace(zapcore.ErrorLevel))
 	return options
 }
 
-// 以下为常用日志方法封装（SugaredLogger，易用性优先）
+// 以下为常用日志方法封装（SugaredLogger）
 
 func Debug(template string, args ...interface{}) {
 	sugarLogger.Debugf(template, args...)
