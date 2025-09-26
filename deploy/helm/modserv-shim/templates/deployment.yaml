@@ -23,6 +23,10 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.useHostNetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -60,10 +64,22 @@ spec:
           volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with .Values.volumes }}
       volumes:
+        # ConfigMap volume for configuration files
+        - name: config-volume
+          configMap:
+            name: {{ include "modserv-shim.fullname" . }}-config
+            items:
+              - key: "conf.yaml"
+                path: "conf.yaml"
+              - key: "shimlets/k8s-shimlet.yaml"
+                path: "shimlets/k8s-shimlet.yaml"
+              - key: "shimlets/kubeconfig"
+                path: "shimlets/kubeconfig"
+        # Include additional volumes from values
+        {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

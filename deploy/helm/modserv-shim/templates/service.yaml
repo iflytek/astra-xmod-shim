@@ -6,6 +6,10 @@ metadata:
     {{- include "modserv-shim.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
+  {{- if .Values.useHostNetwork }}
+  # When using hostNetwork, we don't need ClusterIP
+  clusterIP: None
+  {{- end }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: http
