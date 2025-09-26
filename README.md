@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="xmod-shim.svg" alt="Astra-mod-shim Logo" width="400" />
+<img src="xmod-shim.svg" alt="Astra-mod-shim Logo" width="600" />
 
 <br>
 
