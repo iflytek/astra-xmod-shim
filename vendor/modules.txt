@@ -343,7 +343,6 @@ gopkg.in/evanphx/json-patch.v4
 gopkg.in/inf.v0
 # gopkg.in/natefinch/lumberjack.v2 v2.2.1
 ## explicit; go 1.13
-gopkg.in/natefinch/lumberjack.v2
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
