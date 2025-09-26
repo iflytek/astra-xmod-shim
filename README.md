@@ -1,6 +1,6 @@
-<div align="center">
 
   <span style="display: inline-block; vertical-align: middle;">
+    <img src="logo.svg" alt="Astra-mod-shim Logo" width="150" />
   </span>
   <span style="display: inline-block; vertical-align: middle; margin-left: 20px;">
     <h1 style="margin: 0; font-size: 2.2em; color: #0366d6;">Astra-mod-shim</h1>
@@ -23,7 +23,6 @@
 [![Stars](https://img.shields.io/github/stars/iflytek/astra-xmod-shim?style=social)](https://github.com/iflytek/astra-xmod-shim)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-</div>
 
 
 
