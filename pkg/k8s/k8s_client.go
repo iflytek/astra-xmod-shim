@@ -747,13 +747,13 @@ func (c *K8sClient) DeletePodsOnNodesInNamespace(namespace string, nodes []*core
 		)
 		if err != nil {
 			// Ignore not found errors, log other errors and continue
-		if !k8s_errors.IsNotFound(err) {
-			log.Error("Failed to delete Pod %s/%s: %v", namespace, pod.Name, err)
-			continue
+			if !k8s_errors.IsNotFound(err) {
+				log.Error("Failed to delete Pod %s/%s: %v", namespace, pod.Name, err)
+				continue
+			}
+		} else {
+			log.Info("Successfully deleted Pod %s/%s", namespace, pod.Name)
 		}
-	} else {
-		log.Info("Successfully deleted Pod %s/%s", namespace, pod.Name)
-	}
 	}
 
 	return nil
