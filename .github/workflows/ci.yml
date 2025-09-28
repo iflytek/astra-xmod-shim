@@ -1,32 +1,44 @@
-name: CI
+name: Continuous Integration
 
+# Trigger the workflow on push events to the main branch.
 on:
   push:
     branches: [ "main" ]
 
+# Build and publish a multi-architecture Docker image to GHCR.
 jobs:
   build:
+    # Run on the latest Ubuntu environment.
     runs-on: ubuntu-latest
+
+    # Grant permissions to write packages (Docker images) to GHCR.
     permissions:
-      packages: write    # 允许推送镜像到 GHCR
+      packages: write
+      contents: read
 
     steps:
-      - name: Checkout
+      # Step 1: Checkout source code from the repository.
+      - name: Checkout Source Code
         uses: actions/checkout@v4
 
+      # Step 2: Set up Go environment with the specified version.
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.24'
 
-      - name: Install Make (if needed)
-        run: sudo apt-get update && sudo apt-get install -y make
+      # Step 3: Install Make if not present (required for build automation).
+      - name: Install Make
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y make
 
-      # 🔧 新增：启用 Buildx
+      # Step 4: Set up Docker Buildx for multi-architecture image building.
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # ✅ 登录 GHCR
+      # Step 5: Log in to GitHub Container Registry (GHCR).
+      # Credentials use the built-in GITHUB_TOKEN for secure authentication.
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -34,12 +46,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # ✅ 编译二进制
+      # Step 6: Build the Go binary using Make.
+      # Assumes a Makefile with a 'build' target that runs 'go build'.
       - name: Build Binary
         run: make build
 
-      # ✅ 构建并推送多架构镜像
-      - name: Build and Push Multi-Arch Image
+      # Step 7: Build and push a multi-architecture Docker image.
+      # Supports linux/amd64 and linux/arm64 by default.
+      # Image is tagged with the Git commit SHA for traceability.
+      - name: Build and Push Multi-Architecture Docker Image
         env:
           IMAGE_REPO: ghcr.io/${{ github.repository }}
           IMAGE_TAG: ${{ github.sha }}
