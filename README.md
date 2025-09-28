@@ -1,5 +1,5 @@
 <div align="center">
-<img src="xmod-shim.svg" alt="Astra-mod-shim Logo" width="600" />
+<img src="xmod-shim.svg?v=2" alt="Astra-mod-shim Logo" width="600" />
 <br>
 
 [![License](https://img.shields.io/github/license/iflytek/astra-xmod-shim)](LICENSE)
