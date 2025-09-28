@@ -13,11 +13,6 @@ import (
 	"modserv-shim/internal/core/statemanager"
 	"modserv-shim/internal/core/tracer"
 	"modserv-shim/pkg/log"
-	"sync"
-)
-
-var (
-	wg sync.WaitGroup
 )
 
 func Init(configPath string) error {
@@ -65,12 +60,6 @@ func Init(configPath string) error {
 	}
 
 	return nil
-}
-
-// registerShutdownHook
-func registerShutdownHook() {
-	// TODO shutdown hook impl
-
 }
 
 func WaitForShutDown() {
