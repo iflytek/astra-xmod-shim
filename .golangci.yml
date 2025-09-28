@@ -12,7 +12,6 @@ linters:
     - staticcheck
     - errcheck
     - unused
-    - typecheck
 
 issues:
   exclude-use-default: false
