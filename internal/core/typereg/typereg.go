@@ -65,7 +65,7 @@ func (r *TypeReg[T]) AutoRegister(instance T) {
 	r.constructorMap[id] = constructor
 
 	// 可选：打印注册日志，方便调试
-	fmt.Println("AutoRegister success: type=%s, id=%s", instanceType.String(), id)
+	fmt.Printf("AutoRegister success: type=%s, id=%s\n", instanceType.String(), id)
 }
 
 // NewUninitialized 根据 ID 创建一个新实例

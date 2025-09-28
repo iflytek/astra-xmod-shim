@@ -363,7 +363,7 @@ func (k *K8sShimlet) Status(resourceId string) (*dto.RuntimeStatus, error) {
 
 	// 🌟 新增：从 PodTemplate 中提取容器端口（即 NodePort）
 	var nodePort int32 = 0
-	if deployment.Spec.Template.Spec.Containers != nil && len(deployment.Spec.Template.Spec.Containers) > 0 {
+	if len(deployment.Spec.Template.Spec.Containers) > 0 {
 		for _, c := range deployment.Spec.Template.Spec.Containers {
 			if c.Ports != nil {
 				for _, p := range c.Ports {
