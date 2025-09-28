@@ -24,15 +24,11 @@ jobs:
           rm -f ./bin/golangci-lint
           mkdir -p ./bin
 
-      - name: Install golangci-lint
-        run: |
-          # 下载 v1.56.2 并验证
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.57.1
-          if [ ! -f ./bin/golangci-lint ]; then
-            echo " Failed to install golangci-lint"
-            exit 1
-          fi
 
+      - name: Install golangci-lint (latest master for Go 1.24)
+        run: |
+          # 从 master 分支安装最新版本（支持 Go 1.24）
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin master
       - name: Verify golangci-lint version
         run: |
           ./bin/golangci-lint --version
