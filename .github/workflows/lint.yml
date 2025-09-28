@@ -27,7 +27,7 @@ jobs:
       - name: Install golangci-lint
         run: |
           # 下载 v1.56.2 并验证
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.56.2
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ./bin v1.57.1
           if [ ! -f ./bin/golangci-lint ]; then
             echo " Failed to install golangci-lint"
             exit 1
