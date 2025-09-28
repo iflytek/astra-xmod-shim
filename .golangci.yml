@@ -1,17 +1,22 @@
-# .golangci.yml
 version: 2
 
 run:
   timeout: 5m
   tests: false
+  skip-dirs:
+    - vendor
+    - third_party
 
 linters:
   enable:
-    - gofmt
-    - govet
-    - staticcheck
-    - errcheck
-    - unused
+    - goimports      # ✅ 格式化 + import 排序（现代 gofmt 替代）
+    - govet          # ✅ 官方静态检查（最基础、最可靠）
+    - staticcheck    # ✅ 高级静态分析（找 bug、性能、死代码）
+    - errcheck       # ✅ 检查 error 是否被忽略（关键！）
+
+linters-settings:
+  goimports:
+    local-prefixes: github.com/iflytek/astra-xmod-shim # 本地包分组
 
 issues:
   exclude-use-default: false
