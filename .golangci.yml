@@ -1,16 +1,18 @@
 # .golangci.yml
+version: 2
+
 run:
   timeout: 5m
-  tests: false  # 不检查 _test.go 文件的风格问题
+  tests: false
 
 linters:
   enable:
-    - gofmt         # 格式化
-#    - govet         # 官方静态检查
-#    - errcheck      # 检查错误是否被忽略
-#    - staticcheck   # 高级静态分析
-#    - unused        # 检查未使用变量/函数
-#    - typecheck     # 类型检查
+    - gofmt
+    - govet
+    - staticcheck
+    - errcheck
+    - unused
+    - typecheck
 
 issues:
   exclude-use-default: false
