@@ -205,7 +205,7 @@ func applyClientConfig(restCfg *rest.Config, cfg *config.K8sConfig) {
 // registerEventHandlers 注册事件处理器（实例方法，直接访问组件）
 func (c *K8sClient) registerEventHandlers() {
 	// Pod事件处理
-	c.podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	_, _ = c.podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			c.queue.AddRateLimited(eventKey("pod", "add", obj))
 		},
@@ -224,7 +224,7 @@ func (c *K8sClient) registerEventHandlers() {
 	})
 
 	// Deployment事件处理
-	c.deployInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	_, _ = c.deployInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			c.queue.AddRateLimited(eventKey("deploy", "add", obj))
 		},
@@ -243,7 +243,7 @@ func (c *K8sClient) registerEventHandlers() {
 	})
 
 	// CM事件处理
-	c.cmInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	_, _ = c.cmInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			c.queue.AddRateLimited(eventKey("CM", "add", obj))
 		},
@@ -262,7 +262,7 @@ func (c *K8sClient) registerEventHandlers() {
 	})
 
 	// node事件处理
-	c.nodeInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	_, _ = c.nodeInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			c.queue.AddRateLimited(eventKey("node", "add", obj))
 		},
@@ -437,7 +437,7 @@ func (c *K8sClient) UpsertConfigMap(namespace, name string) (*corev1.ConfigMap, 
 	}
 
 	// 6. 资源已存在，更新（保留ResourceVersion实现乐观锁）
-	targetCM.ObjectMeta.ResourceVersion = existingCM.ObjectMeta.ResourceVersion
+	targetCM.ResourceVersion = existingCM.ResourceVersion
 	// Preserve existing labels (avoid overwriting other labels)
 	for k, v := range existingCM.Labels {
 		if _, ok := targetCM.Labels[k]; !ok {
@@ -459,30 +459,7 @@ func (c *K8sClient) UpsertConfigMap(namespace, name string) (*corev1.ConfigMap, 
 	)
 }
 
-// UpsertStrategyConfigMap Atomically create or update ConfigMap that stores Strategy
-func (c *K8sClient) getConfigMap(namespace, name string) (*corev1.ConfigMap, error) {
-	// 1. Validate parameter legality
-	if err := validateConfigMapName(name); err != nil {
-		return nil, fmt.Errorf("ConfigMap name is invalid: %w", err)
-	}
-	if namespace == "" {
-		return nil, errors.New("namespace cannot be empty")
-	}
 
-	// 2. Try to get existing ConfigMap
-	existingCM, err := c.client.CoreV1().ConfigMaps(namespace).Get(
-		context.Background(),
-		name,
-		metav1.GetOptions{},
-	)
-
-	// 5. Handle existence/non-existence cases (using errors.IsNotFound to determine)
-	if err != nil {
-		return nil, fmt.Errorf("查询ConfigMap失败: %w", err)
-	}
-
-	return existingCM, nil
-}
 
 // validateConfigMapName Validate ConfigMap name legality
 func validateConfigMapName(name string) error {
