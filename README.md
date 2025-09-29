@@ -16,24 +16,16 @@
 [![Stars](https://img.shields.io/github/stars/iflytek/astra-xmod-shim?style=social)](https://github.com/iflytek/astra-xmod-shim)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-</div>
-
-
-
-**Astra-xmod-shim：是一款轻量级的, 声明式的AI 服务管控中间件**，基于用户的期望状态，通过状态驱动的调协循环, 持续收敛至目标状态。
-pipeline 面向抽象的函数式编排的部署流程; shimlet面向抽象的基建运行时适配, 二者构成双层可插拔架构，将“在哪运行”与“如何部署”彻底解耦, 支持快速集成新平台与定制化流程, 真正实现一次定义, 随处部署.
-
-
-
 <span style="font-size:0.9em; color:#586375;">**Language**: [English](README_en.md) | **简体中文**</span>
 
+
+</div>
+
+# Astra-xmod-shim
+轻量级、声明式的 AI 服务管控中间件
+
 ## 项目概述
-
-Astra-xmod-shim 是一款轻量级 AI 模型服务管控中间件，采用插件化架构设计，旨在简化大模型服务的部署、运维与全生命周期管理。
-
-通过 状态驱动主导(FSM)，面向抽象的运行时适配（Shimlet） 与
-函数式可组合的部署流程（Pipeline），系统将“在哪运行”,“如何部署”,"??"彻底解耦，实现跨环境统一管控，支持快速集成新平台与定制化流程，真正达成“一次定义，随处部署”的敏捷能力。
-
+Astra-xmod-shim 是一款轻量级、声明式的 AI 服务管控中间件，基于用户的期望状态，通过状态驱动的调协循环持续收敛至目标。通过 **Pipeline** 实现面向抽象的函数式部署流程编排，**Shimlet** 完成面向抽象的基础设施运行时适配，二者构成双层可插拔架构，将“在哪运行”与“如何部署”彻底解耦，支持快速集成新平台与定制化部署策略，真正实现“一次定义，随处部署”。
 ## 🌟 核心特性
 
 - **插件化环境抽象（Shimlet）**  
