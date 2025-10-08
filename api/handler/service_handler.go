@@ -44,6 +44,7 @@ func DoDeploy(c *gin.Context) {
 	}
 
 	depSpec.ServiceId = utils.GenerateSimpleID()
+
 	err := orchestrator.GlobalOrchestrator.Provision(depSpec)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"modserv-shim/api/server"
 	"modserv-shim/internal/config"
-	"modserv-shim/internal/core/eventbus"
-	"modserv-shim/internal/core/eventbus/subscriptions"
+	"modserv-shim/internal/core/goal"
 	"modserv-shim/internal/core/orchestrator"
-	"modserv-shim/internal/core/pipeline"
 	"modserv-shim/internal/core/shimlet"
 	_ "modserv-shim/internal/core/shimlet/shimlets"
-	"modserv-shim/internal/core/statemanager"
-	"modserv-shim/internal/core/tracer"
+	"modserv-shim/internal/core/state"
+	"modserv-shim/internal/core/workqueue"
 	"modserv-shim/pkg/log"
 )
 
@@ -28,31 +26,22 @@ func Init(configPath string) error {
 
 	// shimlet registry already initialed from init()
 	shimReg := shimlet.Registry
-	pipeReg := pipeline.Registry
+	pipeReg := goal.Registry
 
-	// TODO init stateManager(FSM)
-	stateMgr := statemanager.New()
+	// TODO init stateManager
+	stateMgr := state.New()
 
-	// init eventbus (default use asaskevich impl)
-	eventbusInstance := eventbus.NewAsaskevichEventBus()
-
-	// init eventbus subscriptions
-	subscriptions.Setup(eventbusInstance, stateMgr)
+	// TODO init workqueue
+	workQueue := workqueue.New()
 
 	// 初始化全局Tracer单例
-	statusTracer := tracer.New(eventbusInstance)
-	shim, _ := shimReg.GetSingleton(cfg.CurrentShimlet)
+	infraShim, _ := shimReg.GetSingleton(cfg.CurrentShimlet)
 
-	// Trace 已部署的服务
-	err := statusTracer.Init(shim, 30)
-	if err != nil {
-		return err
-	}
-
-	log.Info("Global tracer initialized")
+	// TODO 利用shimlet get 出服务列表
+	_, _ = infraShim.ListDeployedServices()
 
 	// init orchestrator
-	orchestrator.GlobalOrchestrator = orchestrator.NewOrchestrator(shimReg, pipeReg, eventbusInstance, statusTracer, stateMgr)
+	orchestrator.GlobalOrchestrator = orchestrator.NewOrchestrator(shimReg, pipeReg, workQueue, stateMgr)
 
 	// 6. 初始化 HTTP Server
 	if err := server.Init(); err != nil {

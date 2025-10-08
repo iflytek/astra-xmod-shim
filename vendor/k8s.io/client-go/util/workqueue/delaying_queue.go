@@ -22,7 +22,6 @@ import (
 	"time"
 
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/klog/v2"
 	"k8s.io/utils/clock"
 )
 
@@ -47,10 +46,6 @@ type DelayingQueueConfig = TypedDelayingQueueConfig[any]
 
 // TypedDelayingQueueConfig specifies optional configurations to customize a DelayingInterface.
 type TypedDelayingQueueConfig[T comparable] struct {
-	// An optional logger. The name of the queue does *not* get added to it, this should
-	// be done by the caller if desired.
-	Logger *klog.Logger
-
 	// Name for the queue. If unnamed, the metrics will not be registered.
 	Name string
 
@@ -69,40 +64,29 @@ type TypedDelayingQueueConfig[T comparable] struct {
 // NewDelayingQueue does not emit metrics. For use with a MetricsProvider, please use
 // NewDelayingQueueWithConfig instead and specify a name.
 //
-// Deprecated: use NewTypedDelayingQueue instead.
+// Deprecated: use TypedNewDelayingQueue instead.
 func NewDelayingQueue() DelayingInterface {
 	return NewDelayingQueueWithConfig(DelayingQueueConfig{})
 }
 
-// NewTypedDelayingQueue constructs a new workqueue with delayed queuing ability.
-// NewTypedDelayingQueue does not emit metrics. For use with a MetricsProvider, please use
-// NewTypedDelayingQueueWithConfig instead and specify a name.
-func NewTypedDelayingQueue[T comparable]() TypedDelayingInterface[T] {
+// TypedNewDelayingQueue constructs a new workqueue with delayed queuing ability.
+// TypedNewDelayingQueue does not emit metrics. For use with a MetricsProvider, please use
+// TypedNewDelayingQueueWithConfig instead and specify a name.
+func TypedNewDelayingQueue[T comparable]() TypedDelayingInterface[T] {
 	return NewTypedDelayingQueueWithConfig(TypedDelayingQueueConfig[T]{})
 }
 
 // NewDelayingQueueWithConfig constructs a new workqueue with options to
 // customize different properties.
 //
-// Deprecated: use NewTypedDelayingQueueWithConfig instead.
+// Deprecated: use TypedNewDelayingQueueWithConfig instead.
 func NewDelayingQueueWithConfig(config DelayingQueueConfig) DelayingInterface {
 	return NewTypedDelayingQueueWithConfig[any](config)
-}
-
-// TypedNewDelayingQueue exists for backwards compatibility only.
-//
-// Deprecated: use NewTypedDelayingQueueWithConfig instead.
-func TypedNewDelayingQueue[T comparable]() TypedDelayingInterface[T] {
-	return NewTypedDelayingQueue[T]()
 }
 
 // NewTypedDelayingQueueWithConfig constructs a new workqueue with options to
 // customize different properties.
 func NewTypedDelayingQueueWithConfig[T comparable](config TypedDelayingQueueConfig[T]) TypedDelayingInterface[T] {
-	logger := klog.Background()
-	if config.Logger != nil {
-		logger = *config.Logger
-	}
 	if config.Clock == nil {
 		config.Clock = clock.RealClock{}
 	}
@@ -115,7 +99,7 @@ func NewTypedDelayingQueueWithConfig[T comparable](config TypedDelayingQueueConf
 		})
 	}
 
-	return newDelayingQueue(logger, config.Clock, config.Queue, config.Name, config.MetricsProvider)
+	return newDelayingQueue(config.Clock, config.Queue, config.Name, config.MetricsProvider)
 }
 
 // NewDelayingQueueWithCustomQueue constructs a new workqueue with ability to
@@ -144,17 +128,17 @@ func NewDelayingQueueWithCustomClock(clock clock.WithTicker, name string) Delayi
 	})
 }
 
-func newDelayingQueue[T comparable](logger klog.Logger, clock clock.WithTicker, q TypedInterface[T], name string, provider MetricsProvider) *delayingType[T] {
+func newDelayingQueue[T comparable](clock clock.WithTicker, q TypedInterface[T], name string, provider MetricsProvider) *delayingType[T] {
 	ret := &delayingType[T]{
 		TypedInterface:  q,
 		clock:           clock,
 		heartbeat:       clock.NewTicker(maxWait),
 		stopCh:          make(chan struct{}),
-		waitingForAddCh: make(chan *waitFor[T], 1000),
+		waitingForAddCh: make(chan *waitFor, 1000),
 		metrics:         newRetryMetrics(name, provider),
 	}
 
-	go ret.waitingLoop(logger)
+	go ret.waitingLoop()
 	return ret
 }
 
@@ -174,15 +158,15 @@ type delayingType[T comparable] struct {
 	heartbeat clock.Ticker
 
 	// waitingForAddCh is a buffered channel that feeds waitingForAdd
-	waitingForAddCh chan *waitFor[T]
+	waitingForAddCh chan *waitFor
 
 	// metrics counts the number of retries
 	metrics retryMetrics
 }
 
 // waitFor holds the data to add and the time it should be added
-type waitFor[T any] struct {
-	data    T
+type waitFor struct {
+	data    t
 	readyAt time.Time
 	// index in the priority queue (heap)
 	index int
@@ -196,15 +180,15 @@ type waitFor[T any] struct {
 // it has been removed from the queue and placed at index Len()-1 by
 // container/heap. Push adds an item at index Len(), and container/heap
 // percolates it into the correct location.
-type waitForPriorityQueue[T any] []*waitFor[T]
+type waitForPriorityQueue []*waitFor
 
-func (pq waitForPriorityQueue[T]) Len() int {
+func (pq waitForPriorityQueue) Len() int {
 	return len(pq)
 }
-func (pq waitForPriorityQueue[T]) Less(i, j int) bool {
+func (pq waitForPriorityQueue) Less(i, j int) bool {
 	return pq[i].readyAt.Before(pq[j].readyAt)
 }
-func (pq waitForPriorityQueue[T]) Swap(i, j int) {
+func (pq waitForPriorityQueue) Swap(i, j int) {
 	pq[i], pq[j] = pq[j], pq[i]
 	pq[i].index = i
 	pq[j].index = j
@@ -212,16 +196,16 @@ func (pq waitForPriorityQueue[T]) Swap(i, j int) {
 
 // Push adds an item to the queue. Push should not be called directly; instead,
 // use `heap.Push`.
-func (pq *waitForPriorityQueue[T]) Push(x interface{}) {
+func (pq *waitForPriorityQueue) Push(x interface{}) {
 	n := len(*pq)
-	item := x.(*waitFor[T])
+	item := x.(*waitFor)
 	item.index = n
 	*pq = append(*pq, item)
 }
 
 // Pop removes an item from the queue. Pop should not be called directly;
 // instead, use `heap.Pop`.
-func (pq *waitForPriorityQueue[T]) Pop() interface{} {
+func (pq *waitForPriorityQueue) Pop() interface{} {
 	n := len(*pq)
 	item := (*pq)[n-1]
 	item.index = -1
@@ -231,7 +215,7 @@ func (pq *waitForPriorityQueue[T]) Pop() interface{} {
 
 // Peek returns the item at the beginning of the queue, without removing the
 // item or otherwise mutating the queue. It is safe to call directly.
-func (pq waitForPriorityQueue[T]) Peek() interface{} {
+func (pq waitForPriorityQueue) Peek() interface{} {
 	return pq[0]
 }
 
@@ -263,7 +247,7 @@ func (q *delayingType[T]) AddAfter(item T, duration time.Duration) {
 	select {
 	case <-q.stopCh:
 		// unblock if ShutDown() is called
-	case q.waitingForAddCh <- &waitFor[T]{data: item, readyAt: q.clock.Now().Add(duration)}:
+	case q.waitingForAddCh <- &waitFor{data: item, readyAt: q.clock.Now().Add(duration)}:
 	}
 }
 
@@ -273,8 +257,8 @@ func (q *delayingType[T]) AddAfter(item T, duration time.Duration) {
 const maxWait = 10 * time.Second
 
 // waitingLoop runs until the workqueue is shutdown and keeps a check on the list of items to be added.
-func (q *delayingType[T]) waitingLoop(logger klog.Logger) {
-	defer utilruntime.HandleCrashWithLogger(logger)
+func (q *delayingType[T]) waitingLoop() {
+	defer utilruntime.HandleCrash()
 
 	// Make a placeholder channel to use when there are no items in our list
 	never := make(<-chan time.Time)
@@ -282,10 +266,10 @@ func (q *delayingType[T]) waitingLoop(logger klog.Logger) {
 	// Make a timer that expires when the item at the head of the waiting queue is ready
 	var nextReadyAtTimer clock.Timer
 
-	waitingForQueue := &waitForPriorityQueue[T]{}
+	waitingForQueue := &waitForPriorityQueue{}
 	heap.Init(waitingForQueue)
 
-	waitingEntryByData := map[T]*waitFor[T]{}
+	waitingEntryByData := map[t]*waitFor{}
 
 	for {
 		if q.TypedInterface.ShuttingDown() {
@@ -296,13 +280,13 @@ func (q *delayingType[T]) waitingLoop(logger klog.Logger) {
 
 		// Add ready entries
 		for waitingForQueue.Len() > 0 {
-			entry := waitingForQueue.Peek().(*waitFor[T])
+			entry := waitingForQueue.Peek().(*waitFor)
 			if entry.readyAt.After(now) {
 				break
 			}
 
-			entry = heap.Pop(waitingForQueue).(*waitFor[T])
-			q.Add(entry.data)
+			entry = heap.Pop(waitingForQueue).(*waitFor)
+			q.Add(entry.data.(T))
 			delete(waitingEntryByData, entry.data)
 		}
 
@@ -312,7 +296,7 @@ func (q *delayingType[T]) waitingLoop(logger klog.Logger) {
 			if nextReadyAtTimer != nil {
 				nextReadyAtTimer.Stop()
 			}
-			entry := waitingForQueue.Peek().(*waitFor[T])
+			entry := waitingForQueue.Peek().(*waitFor)
 			nextReadyAtTimer = q.clock.NewTimer(entry.readyAt.Sub(now))
 			nextReadyAt = nextReadyAtTimer.C()
 		}
@@ -331,7 +315,7 @@ func (q *delayingType[T]) waitingLoop(logger klog.Logger) {
 			if waitEntry.readyAt.After(q.clock.Now()) {
 				insert(waitingForQueue, waitingEntryByData, waitEntry)
 			} else {
-				q.Add(waitEntry.data)
+				q.Add(waitEntry.data.(T))
 			}
 
 			drained := false
@@ -341,7 +325,7 @@ func (q *delayingType[T]) waitingLoop(logger klog.Logger) {
 					if waitEntry.readyAt.After(q.clock.Now()) {
 						insert(waitingForQueue, waitingEntryByData, waitEntry)
 					} else {
-						q.Add(waitEntry.data)
+						q.Add(waitEntry.data.(T))
 					}
 				default:
 					drained = true
@@ -352,7 +336,7 @@ func (q *delayingType[T]) waitingLoop(logger klog.Logger) {
 }
 
 // insert adds the entry to the priority queue, or updates the readyAt if it already exists in the queue
-func insert[T comparable](q *waitForPriorityQueue[T], knownEntries map[T]*waitFor[T], entry *waitFor[T]) {
+func insert(q *waitForPriorityQueue, knownEntries map[t]*waitFor, entry *waitFor) {
 	// if the entry already exists, update the time only if it would cause the item to be queued sooner
 	existing, exists := knownEntries[entry.data]
 	if exists {

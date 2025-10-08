@@ -80,13 +80,12 @@ func extractClusterRole(clusterRole *rbacv1alpha1.ClusterRole, fieldManager stri
 	b.WithAPIVersion("rbac.authorization.k8s.io/v1alpha1")
 	return b, nil
 }
-func (b ClusterRoleApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Kind field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithKind(value string) *ClusterRoleApplyConfiguration {
-	b.TypeMetaApplyConfiguration.Kind = &value
+	b.Kind = &value
 	return b
 }
 
@@ -94,7 +93,7 @@ func (b *ClusterRoleApplyConfiguration) WithKind(value string) *ClusterRoleApply
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the APIVersion field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithAPIVersion(value string) *ClusterRoleApplyConfiguration {
-	b.TypeMetaApplyConfiguration.APIVersion = &value
+	b.APIVersion = &value
 	return b
 }
 
@@ -103,7 +102,7 @@ func (b *ClusterRoleApplyConfiguration) WithAPIVersion(value string) *ClusterRol
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithName(value string) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.Name = &value
+	b.Name = &value
 	return b
 }
 
@@ -112,7 +111,7 @@ func (b *ClusterRoleApplyConfiguration) WithName(value string) *ClusterRoleApply
 // If called multiple times, the GenerateName field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithGenerateName(value string) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.GenerateName = &value
+	b.GenerateName = &value
 	return b
 }
 
@@ -121,7 +120,7 @@ func (b *ClusterRoleApplyConfiguration) WithGenerateName(value string) *ClusterR
 // If called multiple times, the Namespace field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithNamespace(value string) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.Namespace = &value
+	b.Namespace = &value
 	return b
 }
 
@@ -130,7 +129,7 @@ func (b *ClusterRoleApplyConfiguration) WithNamespace(value string) *ClusterRole
 // If called multiple times, the UID field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithUID(value types.UID) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.UID = &value
+	b.UID = &value
 	return b
 }
 
@@ -139,7 +138,7 @@ func (b *ClusterRoleApplyConfiguration) WithUID(value types.UID) *ClusterRoleApp
 // If called multiple times, the ResourceVersion field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithResourceVersion(value string) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.ResourceVersion = &value
+	b.ResourceVersion = &value
 	return b
 }
 
@@ -148,7 +147,7 @@ func (b *ClusterRoleApplyConfiguration) WithResourceVersion(value string) *Clust
 // If called multiple times, the Generation field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithGeneration(value int64) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.Generation = &value
+	b.Generation = &value
 	return b
 }
 
@@ -157,7 +156,7 @@ func (b *ClusterRoleApplyConfiguration) WithGeneration(value int64) *ClusterRole
 // If called multiple times, the CreationTimestamp field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithCreationTimestamp(value metav1.Time) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.CreationTimestamp = &value
+	b.CreationTimestamp = &value
 	return b
 }
 
@@ -166,7 +165,7 @@ func (b *ClusterRoleApplyConfiguration) WithCreationTimestamp(value metav1.Time)
 // If called multiple times, the DeletionTimestamp field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithDeletionTimestamp(value metav1.Time) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.DeletionTimestamp = &value
+	b.DeletionTimestamp = &value
 	return b
 }
 
@@ -175,7 +174,7 @@ func (b *ClusterRoleApplyConfiguration) WithDeletionTimestamp(value metav1.Time)
 // If called multiple times, the DeletionGracePeriodSeconds field is set to the value of the last call.
 func (b *ClusterRoleApplyConfiguration) WithDeletionGracePeriodSeconds(value int64) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.DeletionGracePeriodSeconds = &value
+	b.DeletionGracePeriodSeconds = &value
 	return b
 }
 
@@ -185,11 +184,11 @@ func (b *ClusterRoleApplyConfiguration) WithDeletionGracePeriodSeconds(value int
 // overwriting an existing map entries in Labels field with the same key.
 func (b *ClusterRoleApplyConfiguration) WithLabels(entries map[string]string) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	if b.ObjectMetaApplyConfiguration.Labels == nil && len(entries) > 0 {
-		b.ObjectMetaApplyConfiguration.Labels = make(map[string]string, len(entries))
+	if b.Labels == nil && len(entries) > 0 {
+		b.Labels = make(map[string]string, len(entries))
 	}
 	for k, v := range entries {
-		b.ObjectMetaApplyConfiguration.Labels[k] = v
+		b.Labels[k] = v
 	}
 	return b
 }
@@ -200,11 +199,11 @@ func (b *ClusterRoleApplyConfiguration) WithLabels(entries map[string]string) *C
 // overwriting an existing map entries in Annotations field with the same key.
 func (b *ClusterRoleApplyConfiguration) WithAnnotations(entries map[string]string) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	if b.ObjectMetaApplyConfiguration.Annotations == nil && len(entries) > 0 {
-		b.ObjectMetaApplyConfiguration.Annotations = make(map[string]string, len(entries))
+	if b.Annotations == nil && len(entries) > 0 {
+		b.Annotations = make(map[string]string, len(entries))
 	}
 	for k, v := range entries {
-		b.ObjectMetaApplyConfiguration.Annotations[k] = v
+		b.Annotations[k] = v
 	}
 	return b
 }
@@ -218,7 +217,7 @@ func (b *ClusterRoleApplyConfiguration) WithOwnerReferences(values ...*v1.OwnerR
 		if values[i] == nil {
 			panic("nil value passed to WithOwnerReferences")
 		}
-		b.ObjectMetaApplyConfiguration.OwnerReferences = append(b.ObjectMetaApplyConfiguration.OwnerReferences, *values[i])
+		b.OwnerReferences = append(b.OwnerReferences, *values[i])
 	}
 	return b
 }
@@ -229,7 +228,7 @@ func (b *ClusterRoleApplyConfiguration) WithOwnerReferences(values ...*v1.OwnerR
 func (b *ClusterRoleApplyConfiguration) WithFinalizers(values ...string) *ClusterRoleApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	for i := range values {
-		b.ObjectMetaApplyConfiguration.Finalizers = append(b.ObjectMetaApplyConfiguration.Finalizers, values[i])
+		b.Finalizers = append(b.Finalizers, values[i])
 	}
 	return b
 }
@@ -261,24 +260,8 @@ func (b *ClusterRoleApplyConfiguration) WithAggregationRule(value *AggregationRu
 	return b
 }
 
-// GetKind retrieves the value of the Kind field in the declarative configuration.
-func (b *ClusterRoleApplyConfiguration) GetKind() *string {
-	return b.TypeMetaApplyConfiguration.Kind
-}
-
-// GetAPIVersion retrieves the value of the APIVersion field in the declarative configuration.
-func (b *ClusterRoleApplyConfiguration) GetAPIVersion() *string {
-	return b.TypeMetaApplyConfiguration.APIVersion
-}
-
 // GetName retrieves the value of the Name field in the declarative configuration.
 func (b *ClusterRoleApplyConfiguration) GetName() *string {
 	b.ensureObjectMetaApplyConfigurationExists()
-	return b.ObjectMetaApplyConfiguration.Name
-}
-
-// GetNamespace retrieves the value of the Namespace field in the declarative configuration.
-func (b *ClusterRoleApplyConfiguration) GetNamespace() *string {
-	b.ensureObjectMetaApplyConfigurationExists()
-	return b.ObjectMetaApplyConfiguration.Namespace
+	return b.Name
 }

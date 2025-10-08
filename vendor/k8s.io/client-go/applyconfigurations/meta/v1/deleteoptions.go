@@ -25,13 +25,12 @@ import (
 // DeleteOptionsApplyConfiguration represents a declarative configuration of the DeleteOptions type for use
 // with apply.
 type DeleteOptionsApplyConfiguration struct {
-	TypeMetaApplyConfiguration                       `json:",inline"`
-	GracePeriodSeconds                               *int64                           `json:"gracePeriodSeconds,omitempty"`
-	Preconditions                                    *PreconditionsApplyConfiguration `json:"preconditions,omitempty"`
-	OrphanDependents                                 *bool                            `json:"orphanDependents,omitempty"`
-	PropagationPolicy                                *metav1.DeletionPropagation      `json:"propagationPolicy,omitempty"`
-	DryRun                                           []string                         `json:"dryRun,omitempty"`
-	IgnoreStoreReadErrorWithClusterBreakingPotential *bool                            `json:"ignoreStoreReadErrorWithClusterBreakingPotential,omitempty"`
+	TypeMetaApplyConfiguration `json:",inline"`
+	GracePeriodSeconds         *int64                           `json:"gracePeriodSeconds,omitempty"`
+	Preconditions              *PreconditionsApplyConfiguration `json:"preconditions,omitempty"`
+	OrphanDependents           *bool                            `json:"orphanDependents,omitempty"`
+	PropagationPolicy          *metav1.DeletionPropagation      `json:"propagationPolicy,omitempty"`
+	DryRun                     []string                         `json:"dryRun,omitempty"`
 }
 
 // DeleteOptionsApplyConfiguration constructs a declarative configuration of the DeleteOptions type for use with
@@ -42,13 +41,12 @@ func DeleteOptions() *DeleteOptionsApplyConfiguration {
 	b.WithAPIVersion("meta.k8s.io/v1")
 	return b
 }
-func (b DeleteOptionsApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Kind field is set to the value of the last call.
 func (b *DeleteOptionsApplyConfiguration) WithKind(value string) *DeleteOptionsApplyConfiguration {
-	b.TypeMetaApplyConfiguration.Kind = &value
+	b.Kind = &value
 	return b
 }
 
@@ -56,7 +54,7 @@ func (b *DeleteOptionsApplyConfiguration) WithKind(value string) *DeleteOptionsA
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the APIVersion field is set to the value of the last call.
 func (b *DeleteOptionsApplyConfiguration) WithAPIVersion(value string) *DeleteOptionsApplyConfiguration {
-	b.TypeMetaApplyConfiguration.APIVersion = &value
+	b.APIVersion = &value
 	return b
 }
 
@@ -100,22 +98,4 @@ func (b *DeleteOptionsApplyConfiguration) WithDryRun(values ...string) *DeleteOp
 		b.DryRun = append(b.DryRun, values[i])
 	}
 	return b
-}
-
-// WithIgnoreStoreReadErrorWithClusterBreakingPotential sets the IgnoreStoreReadErrorWithClusterBreakingPotential field in the declarative configuration to the given value
-// and returns the receiver, so that objects can be built by chaining "With" function invocations.
-// If called multiple times, the IgnoreStoreReadErrorWithClusterBreakingPotential field is set to the value of the last call.
-func (b *DeleteOptionsApplyConfiguration) WithIgnoreStoreReadErrorWithClusterBreakingPotential(value bool) *DeleteOptionsApplyConfiguration {
-	b.IgnoreStoreReadErrorWithClusterBreakingPotential = &value
-	return b
-}
-
-// GetKind retrieves the value of the Kind field in the declarative configuration.
-func (b *DeleteOptionsApplyConfiguration) GetKind() *string {
-	return b.TypeMetaApplyConfiguration.Kind
-}
-
-// GetAPIVersion retrieves the value of the APIVersion field in the declarative configuration.
-func (b *DeleteOptionsApplyConfiguration) GetAPIVersion() *string {
-	return b.TypeMetaApplyConfiguration.APIVersion
 }

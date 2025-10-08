@@ -81,13 +81,12 @@ func extractLease(lease *coordinationv1beta1.Lease, fieldManager string, subreso
 	b.WithAPIVersion("coordination.k8s.io/v1beta1")
 	return b, nil
 }
-func (b LeaseApplyConfiguration) IsApplyConfiguration() {}
 
 // WithKind sets the Kind field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Kind field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithKind(value string) *LeaseApplyConfiguration {
-	b.TypeMetaApplyConfiguration.Kind = &value
+	b.Kind = &value
 	return b
 }
 
@@ -95,7 +94,7 @@ func (b *LeaseApplyConfiguration) WithKind(value string) *LeaseApplyConfiguratio
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the APIVersion field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithAPIVersion(value string) *LeaseApplyConfiguration {
-	b.TypeMetaApplyConfiguration.APIVersion = &value
+	b.APIVersion = &value
 	return b
 }
 
@@ -104,7 +103,7 @@ func (b *LeaseApplyConfiguration) WithAPIVersion(value string) *LeaseApplyConfig
 // If called multiple times, the Name field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithName(value string) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.Name = &value
+	b.Name = &value
 	return b
 }
 
@@ -113,7 +112,7 @@ func (b *LeaseApplyConfiguration) WithName(value string) *LeaseApplyConfiguratio
 // If called multiple times, the GenerateName field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithGenerateName(value string) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.GenerateName = &value
+	b.GenerateName = &value
 	return b
 }
 
@@ -122,7 +121,7 @@ func (b *LeaseApplyConfiguration) WithGenerateName(value string) *LeaseApplyConf
 // If called multiple times, the Namespace field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithNamespace(value string) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.Namespace = &value
+	b.Namespace = &value
 	return b
 }
 
@@ -131,7 +130,7 @@ func (b *LeaseApplyConfiguration) WithNamespace(value string) *LeaseApplyConfigu
 // If called multiple times, the UID field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithUID(value types.UID) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.UID = &value
+	b.UID = &value
 	return b
 }
 
@@ -140,7 +139,7 @@ func (b *LeaseApplyConfiguration) WithUID(value types.UID) *LeaseApplyConfigurat
 // If called multiple times, the ResourceVersion field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithResourceVersion(value string) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.ResourceVersion = &value
+	b.ResourceVersion = &value
 	return b
 }
 
@@ -149,7 +148,7 @@ func (b *LeaseApplyConfiguration) WithResourceVersion(value string) *LeaseApplyC
 // If called multiple times, the Generation field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithGeneration(value int64) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.Generation = &value
+	b.Generation = &value
 	return b
 }
 
@@ -158,7 +157,7 @@ func (b *LeaseApplyConfiguration) WithGeneration(value int64) *LeaseApplyConfigu
 // If called multiple times, the CreationTimestamp field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithCreationTimestamp(value metav1.Time) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.CreationTimestamp = &value
+	b.CreationTimestamp = &value
 	return b
 }
 
@@ -167,7 +166,7 @@ func (b *LeaseApplyConfiguration) WithCreationTimestamp(value metav1.Time) *Leas
 // If called multiple times, the DeletionTimestamp field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithDeletionTimestamp(value metav1.Time) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.DeletionTimestamp = &value
+	b.DeletionTimestamp = &value
 	return b
 }
 
@@ -176,7 +175,7 @@ func (b *LeaseApplyConfiguration) WithDeletionTimestamp(value metav1.Time) *Leas
 // If called multiple times, the DeletionGracePeriodSeconds field is set to the value of the last call.
 func (b *LeaseApplyConfiguration) WithDeletionGracePeriodSeconds(value int64) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	b.ObjectMetaApplyConfiguration.DeletionGracePeriodSeconds = &value
+	b.DeletionGracePeriodSeconds = &value
 	return b
 }
 
@@ -186,11 +185,11 @@ func (b *LeaseApplyConfiguration) WithDeletionGracePeriodSeconds(value int64) *L
 // overwriting an existing map entries in Labels field with the same key.
 func (b *LeaseApplyConfiguration) WithLabels(entries map[string]string) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	if b.ObjectMetaApplyConfiguration.Labels == nil && len(entries) > 0 {
-		b.ObjectMetaApplyConfiguration.Labels = make(map[string]string, len(entries))
+	if b.Labels == nil && len(entries) > 0 {
+		b.Labels = make(map[string]string, len(entries))
 	}
 	for k, v := range entries {
-		b.ObjectMetaApplyConfiguration.Labels[k] = v
+		b.Labels[k] = v
 	}
 	return b
 }
@@ -201,11 +200,11 @@ func (b *LeaseApplyConfiguration) WithLabels(entries map[string]string) *LeaseAp
 // overwriting an existing map entries in Annotations field with the same key.
 func (b *LeaseApplyConfiguration) WithAnnotations(entries map[string]string) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
-	if b.ObjectMetaApplyConfiguration.Annotations == nil && len(entries) > 0 {
-		b.ObjectMetaApplyConfiguration.Annotations = make(map[string]string, len(entries))
+	if b.Annotations == nil && len(entries) > 0 {
+		b.Annotations = make(map[string]string, len(entries))
 	}
 	for k, v := range entries {
-		b.ObjectMetaApplyConfiguration.Annotations[k] = v
+		b.Annotations[k] = v
 	}
 	return b
 }
@@ -219,7 +218,7 @@ func (b *LeaseApplyConfiguration) WithOwnerReferences(values ...*v1.OwnerReferen
 		if values[i] == nil {
 			panic("nil value passed to WithOwnerReferences")
 		}
-		b.ObjectMetaApplyConfiguration.OwnerReferences = append(b.ObjectMetaApplyConfiguration.OwnerReferences, *values[i])
+		b.OwnerReferences = append(b.OwnerReferences, *values[i])
 	}
 	return b
 }
@@ -230,7 +229,7 @@ func (b *LeaseApplyConfiguration) WithOwnerReferences(values ...*v1.OwnerReferen
 func (b *LeaseApplyConfiguration) WithFinalizers(values ...string) *LeaseApplyConfiguration {
 	b.ensureObjectMetaApplyConfigurationExists()
 	for i := range values {
-		b.ObjectMetaApplyConfiguration.Finalizers = append(b.ObjectMetaApplyConfiguration.Finalizers, values[i])
+		b.Finalizers = append(b.Finalizers, values[i])
 	}
 	return b
 }
@@ -249,24 +248,8 @@ func (b *LeaseApplyConfiguration) WithSpec(value *LeaseSpecApplyConfiguration) *
 	return b
 }
 
-// GetKind retrieves the value of the Kind field in the declarative configuration.
-func (b *LeaseApplyConfiguration) GetKind() *string {
-	return b.TypeMetaApplyConfiguration.Kind
-}
-
-// GetAPIVersion retrieves the value of the APIVersion field in the declarative configuration.
-func (b *LeaseApplyConfiguration) GetAPIVersion() *string {
-	return b.TypeMetaApplyConfiguration.APIVersion
-}
-
 // GetName retrieves the value of the Name field in the declarative configuration.
 func (b *LeaseApplyConfiguration) GetName() *string {
 	b.ensureObjectMetaApplyConfigurationExists()
-	return b.ObjectMetaApplyConfiguration.Name
-}
-
-// GetNamespace retrieves the value of the Namespace field in the declarative configuration.
-func (b *LeaseApplyConfiguration) GetNamespace() *string {
-	b.ensureObjectMetaApplyConfigurationExists()
-	return b.ObjectMetaApplyConfiguration.Namespace
+	return b.Name
 }
