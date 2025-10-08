@@ -1,10 +1,5 @@
 package dto
 
-import (
-	"modserv-shim/internal/core/goal"
-	"modserv-shim/internal/core/shimlet"
-)
-
 // ResourceRequirements 定义资源需求
 type ResourceRequirements struct {
 	AcceleratorType  string `json:"acceleratorType"`  // 显卡类型
@@ -20,8 +15,7 @@ type DeploySpec struct {
 	ReplicaCount         int                   `json:"replicaCount"`
 	ContextLength        int                   `json:"contextLength"`
 	Env                  []Env                 `json:"env"`
-	Shimlet              shimlet.Shimlet       `json:"shimlet"`
-	GoalSet              *goal.GoalSet         `json:"goalset"`
+	GoalSetName          string                `json:"goalSetName"`
 }
 
 type Env struct {

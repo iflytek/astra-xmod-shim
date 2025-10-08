@@ -11,14 +11,12 @@ import (
 // 构造 mapModelNameToPath Goal
 var modelPathReady = goal.Goal{
 	Name: "map-model-path",
-	IsAchieved: func(ctx goal.Context) bool {
+	IsAchieved: func(ctx *goal.Context) bool {
 		// 如果 ModelFileDir 已设置，说明已经执行过
-		if ctx.DeploySpec.ModelFileDir != "" {
-			return true
-		}
+
 		return false
 	},
-	Ensure: func(ctx goal.Context) error {
+	Ensure: func(ctx *goal.Context) error {
 		modelRoot := config.Get().ModelManage.ModelRoot
 		if modelRoot == "" {
 			modelRoot = "/models"
@@ -30,24 +28,23 @@ var modelPathReady = goal.Goal{
 		log.Info("Mapping model name to path: %s -> %s", ctx.DeploySpec.ModelName, modelDir)
 
 		// Set mapped path to DeploySpec
-		ctx.DeploySpec.ModelFileDir = modelDir
+		ctx.Data["model-path"] = modelDir
 		return nil
 	},
 }
 
 var deployFinish = goal.Goal{Name: "deployFinish",
-	IsAchieved: func(ctx goal.Context) bool {
-		if ctx.ResourceId != "" {
+	IsAchieved: func(ctx *goal.Context) bool {
+		if ctx.DeploySpec.ServiceId != "" {
 			return true
 		}
 		return false
 	},
-	Ensure: func(ctx goal.Context) error {
-		resourceId, err := ctx.Shimlet.Apply(ctx.DeploySpec)
+	Ensure: func(ctx *goal.Context) error {
+		err := ctx.Shimlet.Apply(ctx.DeploySpec)
 		if err != nil {
 			return err
 		}
-		ctx.ResourceId = resourceId
 		return nil
 	}}
 

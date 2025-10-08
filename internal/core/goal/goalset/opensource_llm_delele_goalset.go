@@ -6,15 +6,15 @@ import (
 )
 
 var deployDeleted = goal.Goal{Name: "deployFinish",
-	IsAchieved: func(ctx goal.Context) bool {
-		status, err := ctx.Shimlet.Status(ctx.ResourceId)
+	IsAchieved: func(ctx *goal.Context) bool {
+		status, err := ctx.Shimlet.Status(ctx.DeploySpec.ServiceId)
 		if err != nil {
 			return false
 		}
 		return status.EndPoint == ""
 	},
-	Ensure: func(ctx goal.Context) error {
-		err := ctx.Shimlet.Delete(ctx.ResourceId)
+	Ensure: func(ctx *goal.Context) error {
+		err := ctx.Shimlet.Delete(ctx.DeploySpec.ServiceId)
 		if err != nil {
 			return err
 		}

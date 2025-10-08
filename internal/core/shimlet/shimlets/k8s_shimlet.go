@@ -67,7 +67,7 @@ func (k *K8sShimlet) InitWithConfig(confPath string) error {
 //   - Mounts the model volume at the same path used in --model and MODEL env
 //
 // Returns a success message with exposed port, or an error if deployment fails.
-func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
+func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) error {
 	// Generate deployment and container names
 	deploymentName := utils.ModelNameToDeploymentName(deploySpec.ModelName) + "-" + deploySpec.ServiceId
 	mainContainerName := utils.ModelNameToDeploymentName(deploySpec.ModelName)
@@ -76,7 +76,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 
 	// Validate model path is provided
 	if modelDirPath == "" {
-		return "", errors.New("model path cannot be empty; please provide a valid model name")
+		return errors.New("model path cannot be empty; please provide a valid model name")
 	}
 
 	// If the path points to a model file, extract its parent directory
@@ -89,7 +89,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 
 	// Final validation of resolved model directory path
 	if modelDirPath == "" || modelDirPath == "." || modelDirPath == "/" {
-		return "", errors.New("resolved model path is invalid")
+		return errors.New("resolved model path is invalid")
 	}
 
 	// Initialize container configuration
@@ -255,10 +255,10 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) (string, error) {
 		metav1.ApplyOptions{FieldManager: "modserv-shim", Force: true},
 	)
 	if err != nil {
-		return "", fmt.Errorf("failed to deploy application: %w", err)
+		return fmt.Errorf("failed to deploy application: %w", err)
 	}
-
-	return fmt.Sprintf("Deployment %s/%s succeeded with hostNetwork on port %d", result.Namespace, result.Name, randomPort), nil
+	log.Info("Deployment %s/%s succeeded with hostNetwork on port %d", result.Namespace, result.Name, randomPort)
+	return nil
 }
 
 // ptr creates a pointer to a string value (helper for ApplyConfigurations).

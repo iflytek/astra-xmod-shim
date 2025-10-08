@@ -6,9 +6,10 @@ import (
 	"modserv-shim/internal/config"
 	"modserv-shim/internal/core/goal"
 	"modserv-shim/internal/core/orchestrator"
+	"modserv-shim/internal/core/reconciler"
 	"modserv-shim/internal/core/shimlet"
 	_ "modserv-shim/internal/core/shimlet/shimlets"
-	"modserv-shim/internal/core/state"
+	"modserv-shim/internal/core/spec"
 	"modserv-shim/internal/core/workqueue"
 	"modserv-shim/pkg/log"
 )
@@ -28,10 +29,15 @@ func Init(configPath string) error {
 	shimReg := shimlet.Registry
 	pipeReg := goal.Registry
 
-	// TODO init stateManager
-	stateMgr := state.New()
+	//  init specStore
+	var specStore spec.Store
+	specStore = spec.NewMemoryStore()
 
-	// TODO init workqueue
+	// init reconciler
+	workerNum := 5
+	reconciler := reconciler.NewReconciler(specStore, workerNum)
+
+	//  init workqueue
 	workQueue := workqueue.New()
 
 	// 初始化全局Tracer单例
@@ -41,7 +47,10 @@ func Init(configPath string) error {
 	_, _ = infraShim.ListDeployedServices()
 
 	// init orchestrator
-	orchestrator.GlobalOrchestrator = orchestrator.NewOrchestrator(shimReg, pipeReg, workQueue, stateMgr)
+	orchestrator.GlobalOrchestrator = orchestrator.NewOrchestrator(shimReg, pipeReg, workQueue, specStore)
+
+	// start reconciler
+	reconciler.Start()
 
 	// 6. 初始化 HTTP Server
 	if err := server.Init(); err != nil {

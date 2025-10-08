@@ -2,22 +2,19 @@ package goal
 
 import (
 	"modserv-shim/internal/core/shimlet"
-	"modserv-shim/internal/core/state"
-	"modserv-shim/internal/core/workqueue"
 	dto "modserv-shim/internal/dto/deploy"
 )
 
 type Context struct {
 	Data       map[string]any // 存储键值对，比如 app_id, url 等
-	Shimlet    shimlet.Shimlet
 	DeploySpec *dto.DeploySpec
-	Queue      *workqueue.Queue
-	ResourceId string
+	Shimlet    shimlet.Shimlet
 }
 
 // NewContext 创建一个新的上下文实例
 func NewContext() *Context {
 	return &Context{
+
 		Data: make(map[string]any), // 初始化 map
 	}
 }
