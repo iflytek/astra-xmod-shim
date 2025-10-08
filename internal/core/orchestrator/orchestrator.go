@@ -1,41 +1,36 @@
 package orchestrator
 
 import (
+	"astron-xmod-shim/internal/config"
+	"astron-xmod-shim/internal/core/goal"
+	_ "astron-xmod-shim/internal/core/goal/goalset"
+	"astron-xmod-shim/internal/core/shimlet"
+	"astron-xmod-shim/internal/core/spec"
+	"astron-xmod-shim/internal/core/typereg"
+	"astron-xmod-shim/internal/core/workqueue"
+	dto "astron-xmod-shim/internal/dto/deploy"
+	"astron-xmod-shim/pkg/log"
 	"fmt"
-	"modserv-shim/internal/config"
-	"modserv-shim/internal/core/eventbus"
-	"modserv-shim/internal/core/pipeline"
-	_ "modserv-shim/internal/core/pipeline/pipelines"
-	"modserv-shim/internal/core/shimlet"
-	"modserv-shim/internal/core/statemanager"
-	"modserv-shim/internal/core/tracer"
-	"modserv-shim/internal/core/typereg"
-	dto "modserv-shim/internal/dto/deploy"
-	eventbus2 "modserv-shim/internal/dto/eventbus"
-	"modserv-shim/pkg/log"
 )
 
 type Orchestrator struct {
-	shimReg      *typereg.TypeReg[shimlet.Shimlet]
-	pipeReg      map[string]*pipeline.Pipeline
-	eventBus     eventbus.EventBus
-	stateManager *statemanager.StateManager
-	tracer       *tracer.Tracer
+	shimReg    *typereg.TypeReg[shimlet.Shimlet]
+	goalSetReg map[string]*goal.GoalSet
+	specStore  spec.Store
+	queue      *workqueue.Queue
 }
 
 func NewOrchestrator(
 	shimReg *typereg.TypeReg[shimlet.Shimlet],
-	pipeReg map[string]*pipeline.Pipeline,
-	eventBus eventbus.EventBus,
-	tracer *tracer.Tracer,
-	stateManager *statemanager.StateManager,
+	pipeReg map[string]*goal.GoalSet,
+	queue *workqueue.Queue,
+	specStore spec.Store,
 ) *Orchestrator {
 	return &Orchestrator{
-		shimReg:      shimReg,
-		pipeReg:      pipeReg,
-		eventBus:     eventBus,
-		tracer:       tracer,
-		stateManager: stateManager,
+		queue:      queue,
+		shimReg:    shimReg,
+		goalSetReg: pipeReg,
+		specStore:  specStore,
 	}
 }
 
@@ -43,51 +38,17 @@ var GlobalOrchestrator *Orchestrator
 
 func (o *Orchestrator) Provision(spec *dto.DeploySpec) error {
 
-	// 兜底事件：开始部署
-	o.eventBus.Publish("service.status", &eventbus2.ServiceEvent{
-		ServiceID: spec.ServiceId,
-		To:        dto.PhaseCreating,
-	})
-
 	// 覆盖掉 nvidia.com/gpu 的 limit
 	spec.ResourceRequirements.AcceleratorType = "nvidia.com/gpu"
 
-	runtimePipe := o.pipeReg[getPipelineName()]
-	if runtimePipe == nil {
-		return fmt.Errorf("pipeline %s not found", getPipelineName())
-	}
+	// DeploySpec 需要持久化 这是用户的部署期望 TODO: 持久化
 
-	currentShimletId := config.Get().CurrentShimlet
-	runtimeShimlet, err := o.shimReg.GetSingleton(currentShimletId)
-	if err != nil {
-		log.Error("get runtime shimlet error", err)
-		return err
-	}
-	pipeCtx := &pipeline.Context{
-		Shimlet:    runtimeShimlet,
-		DeploySpec: spec,
-		EventBus:   o.eventBus,
-		ResourceId: spec.ServiceId,
-		Tracer:     o.tracer,
-		Data:       make(map[string]any),
-	}
-	// 4. 执行pipeline
-	if err := runtimePipe.Execute(pipeCtx); err != nil {
-		// 兜底事件：失败
-		o.eventBus.Publish("service.status", &eventbus2.ServiceEvent{
-			ServiceID: spec.ServiceId,
-			To:        dto.PhaseFailed,
-		})
-		return err
-	}
+	o.specStore.Set(spec.ServiceId, spec)
+
+	// 投递到队列
+	o.queue.Add(spec.ServiceId)
 
 	return nil
-}
-
-// TODO: [临时] 后续应根据 spec.Type 或 metadata 动态选择 pipeline
-// 示例：spec.Type == "llm" → "ai-pipeline", spec.Type == "web" → "web-pipeline"
-func getPipelineName() string {
-	return "opensource_llm"
 }
 
 // DeleteService 删除指定的模型服务
@@ -116,9 +77,9 @@ func (o *Orchestrator) GetServiceStatus(serviceID string) (*dto.RuntimeStatus, e
 		return nil, fmt.Errorf("serviceID is required")
 	}
 
-	runtimeStat := o.stateManager.GetStatus(serviceID)
+	//o.specStore.GetStatus(serviceID)
 
 	// 如果没找到，可以返回“不存在”，或 fallback 到远程查询（可选）
 
-	return runtimeStat, nil
+	return nil, nil
 }

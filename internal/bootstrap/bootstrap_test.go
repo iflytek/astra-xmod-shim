@@ -8,7 +8,7 @@ func TestMain(m *testing.M) {
 
 // 测试正常配置加载流程
 func TestBootStrap_Success(t *testing.T) {
-	Init("/Users/haoxuanli/Documents/GitHub/iflytek/modserv-shim/conf.yaml")
+	Init("/Users/haoxuanli/Documents/GitHub/iflytek/astron-xmod-shim/conf.yaml")
 	//// 验证结果
 	//assert.NoError(t, err)
 	//assert.NotNil(t, cfg)

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"modserv-shim/internal/config"
-	"modserv-shim/pkg/log"
+	"astron-xmod-shim/internal/config"
+	"astron-xmod-shim/pkg/log"
 	"net/http"
 	"os"
 	"path/filepath"

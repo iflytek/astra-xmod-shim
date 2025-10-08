@@ -1,9 +1,9 @@
 package main
 
 import (
+	"astron-xmod-shim/internal/bootstrap"
+	_ "astron-xmod-shim/internal/core/shimlet/shimlets" // 显式导入插件依赖包
 	"log"
-	"modserv-shim/internal/bootstrap"
-	_ "modserv-shim/internal/core/shimlet/shimlets" // 显式导入插件依赖包
 	"os"
 
 	"github.com/spf13/cobra"
@@ -13,7 +13,7 @@ var configPath string
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:   "modserv-shim",
+		Use:   "astron-xmod-shim",
 		Short: "model serve shim",
 		RunE:  runMw,
 	}

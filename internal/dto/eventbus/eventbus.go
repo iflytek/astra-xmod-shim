@@ -1,6 +1,6 @@
 package eventbus
 
-import dto "modserv-shim/internal/dto/deploy"
+import dto "astron-xmod-shim/internal/dto/deploy"
 
 // ServiceEvent represents a state change event
 type ServiceEvent struct {

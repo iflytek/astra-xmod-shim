@@ -1,8 +1,8 @@
-# modserv-shim Helm Chart 使用说明
+# astron-xmod-shim Helm Chart 使用说明
 
 ## 概述
 
-本Helm Chart用于部署modserv-shim应用到Kubernetes集群，使用主机网络模式，并挂载必要的配置文件和模型目录。
+本Helm Chart用于部署astron-xmod-shim应用到Kubernetes集群，使用主机网络模式，并挂载必要的配置文件和模型目录。
 
 ## 主要特性
 
@@ -38,13 +38,13 @@
 
 ```bash
 # 进入Helm chart目录
-cd /Users/haoxuanli/Documents/GitHub/iflytek/modserv-shim/deploy/helm
+cd /Users/haoxuanli/Documents/GitHub/iflytek/astron-xmod-shim/deploy/helm
 
 # 安装或升级应用
-helm upgrade --install modserv-shim modserv-shim/ -f modserv-shim/values.yaml
+helm upgrade --install astron-xmod-shim astron-xmod-shim/ -f astron-xmod-shim/values.yaml
 
 # 验证部署
-kubectl get pods -l app.kubernetes.io/name=modserv-shim
+kubectl get pods -l app.kubernetes.io/name=astron-xmod-shim
 ```
 
 ## 自定义配置
@@ -53,12 +53,12 @@ kubectl get pods -l app.kubernetes.io/name=modserv-shim
 
 1. **修改values.yaml文件**
    ```bash
-   vi modserv-shim/values.yaml
+   vi astron-xmod-shim/values.yaml
    ```
 
 2. **使用自定义values文件**
    ```bash
-   helm upgrade --install modserv-shim modserv-shim/ -f your-custom-values.yaml
+   helm upgrade --install astron-xmod-shim astron-xmod-shim/ -f your-custom-values.yaml
    ```
 
 ## 重要说明
@@ -76,5 +76,5 @@ kubectl get pods -l app.kubernetes.io/name=modserv-shim
 ## 卸载
 
 ```bash
-helm uninstall modserv-shim
+helm uninstall astron-xmod-shim
 ```

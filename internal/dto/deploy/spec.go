@@ -6,7 +6,7 @@ type ResourceRequirements struct {
 	AcceleratorCount int    `json:"acceleratorCount"` // 显卡数量
 }
 
-// DeploySpec 模型部署请求结构体
+// DeploySpec 部署期望结构体
 type DeploySpec struct {
 	ServiceId            string                `json:"serviceId"`
 	ModelName            string                `json:"modelName"`
@@ -15,6 +15,7 @@ type DeploySpec struct {
 	ReplicaCount         int                   `json:"replicaCount"`
 	ContextLength        int                   `json:"contextLength"`
 	Env                  []Env                 `json:"env"`
+	GoalSetName          string                `json:"goalSetName"`
 }
 
 type Env struct {

@@ -1,11 +1,11 @@
 package server
 
 import (
-	"modserv-shim/api/middleware"
-	"modserv-shim/api/route"
-	"modserv-shim/internal/config"
-	"modserv-shim/pkg/http"
-	"modserv-shim/pkg/log"
+	"astron-xmod-shim/api/middleware"
+	"astron-xmod-shim/api/route"
+	"astron-xmod-shim/internal/config"
+	"astron-xmod-shim/pkg/http"
+	"astron-xmod-shim/pkg/log"
 
 	"github.com/gin-gonic/gin"
 )

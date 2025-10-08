@@ -1,11 +1,11 @@
-# 示例配置文件 - modserv-shim
+# 示例配置文件 - astron-xmod-shim
 
 # 副本数量
 replicaCount: 1
 
 # 容器镜像配置
 image:
-  repository: modserv-shim
+  repository: astron-xmod-shim
   pullPolicy: IfNotPresent
   tag: "1.16.0"
 
@@ -21,7 +21,7 @@ service:
 volumes:
   - name: config-volume
     hostPath:
-      path: /path/to/your/modserv-shim/conf
+      path: /path/to/your/astron-xmod-shim/conf
       type: Directory
   - name: maasmodels-volume
     hostPath:

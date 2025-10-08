@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "modserv-shim.fullname" . }}
+  name: {{ include "astron-xmod-shim.fullname" . }}
   labels:
-    {{- include "modserv-shim.labels" . | nindent 4 }}
+    {{- include "astron-xmod-shim.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "modserv-shim.selectorLabels" . | nindent 6 }}
+      {{- include "astron-xmod-shim.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "modserv-shim.labels" . | nindent 8 }}
+        {{- include "astron-xmod-shim.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -31,7 +31,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "modserv-shim.serviceAccountName" . }}
+      serviceAccountName: {{ include "astron-xmod-shim.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -68,7 +68,7 @@ spec:
         # ConfigMap volume for configuration files
         - name: config-volume
           configMap:
-            name: {{ include "modserv-shim.fullname" . }}-config
+            name: {{ include "astron-xmod-shim.fullname" . }}-config
             items:
               - key: "conf.yaml"
                 path: "conf.yaml"

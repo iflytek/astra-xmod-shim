@@ -1,8 +1,8 @@
 package shimlets
 
 import (
-	"modserv-shim/internal/core/shimlet"
-	dto "modserv-shim/internal/dto/deploy"
+	"astron-xmod-shim/internal/core/shimlet"
+	dto "astron-xmod-shim/internal/dto/deploy"
 )
 
 // Compile-time check to ensure shimlet interface is implemented
@@ -18,8 +18,8 @@ func (k *TemplateShimlet) InitWithConfig(confPath string) error {
 	return nil
 }
 
-func (k *TemplateShimlet) Apply(spec *dto.DeploySpec) (resourceId string, err error) {
-	return "", err
+func (k *TemplateShimlet) Apply(spec *dto.DeploySpec) error {
+	return nil
 }
 func (k *TemplateShimlet) Delete(resourceId string) (err error) { return nil }
 func (k *TemplateShimlet) Status(resourceId string) (status *dto.RuntimeStatus, err error) {
