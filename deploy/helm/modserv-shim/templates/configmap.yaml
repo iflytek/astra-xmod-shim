@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "modserv-shim.fullname" . }}-config
+  name: {{ include "astron-xmod-shim.fullname" . }}-config
   labels:
-    {{- include "modserv-shim.labels" . | nindent 4 }}
+    {{- include "astron-xmod-shim.labels" . | nindent 4 }}
 data:
   # 主配置文件
   "conf.yaml": |

@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"modserv-shim/internal/core/orchestrator"
-	dto "modserv-shim/internal/dto/deploy"
-	"modserv-shim/pkg/log"
-	"modserv-shim/pkg/utils"
+	"astron-xmod-shim/internal/core/orchestrator"
+	dto "astron-xmod-shim/internal/dto/deploy"
+	"astron-xmod-shim/pkg/log"
+	"astron-xmod-shim/pkg/utils"
 	"net/http"
 	"time"
 

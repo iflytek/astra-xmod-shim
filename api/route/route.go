@@ -1,8 +1,8 @@
 package route
 
 import (
-	"modserv-shim/api/handler"
-	"modserv-shim/pkg/http"
+	"astron-xmod-shim/api/handler"
+	"astron-xmod-shim/pkg/http"
 
 	"github.com/gin-gonic/gin"
 )

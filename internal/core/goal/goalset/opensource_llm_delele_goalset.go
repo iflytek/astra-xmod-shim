@@ -1,7 +1,7 @@
 package goalset
 
 import (
-	"modserv-shim/internal/core/goal"
+	"astron-xmod-shim/internal/core/goal"
 	"time"
 )
 
@@ -11,7 +11,7 @@ var deployDeleted = goal.Goal{Name: "deployFinish",
 		if err != nil {
 			return false
 		}
-		return status.EndPoint == ""
+		return status.E == ""
 	},
 	Ensure: func(ctx *goal.Context) error {
 		err := ctx.Shimlet.Delete(ctx.DeploySpec.ServiceId)

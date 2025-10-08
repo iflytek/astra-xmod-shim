@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	confSpec "modserv-shim/internal/dto/config"
+	confSpec "astron-xmod-shim/internal/dto/config"
 
 	"github.com/spf13/viper"
 )

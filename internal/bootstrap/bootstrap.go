@@ -1,17 +1,17 @@
 package bootstrap
 
 import (
+	"astron-xmod-shim/api/server"
+	"astron-xmod-shim/internal/config"
+	"astron-xmod-shim/internal/core/goal"
+	"astron-xmod-shim/internal/core/orchestrator"
+	"astron-xmod-shim/internal/core/reconciler"
+	"astron-xmod-shim/internal/core/shimlet"
+	_ "astron-xmod-shim/internal/core/shimlet/shimlets"
+	"astron-xmod-shim/internal/core/spec"
+	"astron-xmod-shim/internal/core/workqueue"
+	"astron-xmod-shim/pkg/log"
 	"fmt"
-	"modserv-shim/api/server"
-	"modserv-shim/internal/config"
-	"modserv-shim/internal/core/goal"
-	"modserv-shim/internal/core/orchestrator"
-	"modserv-shim/internal/core/reconciler"
-	"modserv-shim/internal/core/shimlet"
-	_ "modserv-shim/internal/core/shimlet/shimlets"
-	"modserv-shim/internal/core/spec"
-	"modserv-shim/internal/core/workqueue"
-	"modserv-shim/pkg/log"
 )
 
 func Init(configPath string) error {

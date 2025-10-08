@@ -11,7 +11,7 @@ Designed for extensibility and minimal footprint, it runs as a single binary wit
 ---
 
 ## Architecture
-![架构示意图](img.png)
+![架构示意图](img2.png)
 
 - **Core Engine**: Manages service lifecycle via a finite state machine (FSM), handles API requests, and coordinates plugins.
 - **Shimlet**: Adapts to runtime environments (e.g., Kubernetes, Docker) through a plugin interface.
@@ -34,7 +34,7 @@ Designed for extensibility and minimal footprint, it runs as a single binary wit
 
 ```bash
 # Download and run
-wget https://github.com/iflytek/modserv-shim/releases/latest/download/model-serve-shim
+wget https://github.com/iflytek/astron-xmod-shim/releases/latest/download/model-serve-shim
 chmod +x model-serve-shim
 
 ./model-serve-shim \
@@ -77,8 +77,8 @@ A built-in pipeline for deploying open-source LLMs. Uses a builder pattern to de
 package mypipeline
 
 import (
-  "modserv-shim/internal/core/pipeline"
-  "modserv-shim/pkg/log"
+  "astron-xmod-shim/internal/core/pipeline"
+  "astron-xmod-shim/pkg/log"
 )
 
 func validate(ctx *pipeline.Context) error {
@@ -122,7 +122,7 @@ A built-in runtime adapter that deploys models on Kubernetes using native APIs.
 package k8s
 
 import (
-  "modserv-shim/internal/core/deploy"
+  "astron-xmod-shim/internal/core/deploy"
   metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -206,5 +206,5 @@ Apache License 2.0
 
 ## Contact
 
-- Issues: [GitHub Issues](https://github.com/iflytek/modserv-shim/issues)
+- Issues: [GitHub Issues](https://github.com/iflytek/astron-xmod-shim/issues)
 - Email: hxli28@iflytek.com

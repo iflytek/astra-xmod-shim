@@ -21,7 +21,7 @@
 
 </div>
 
-# Astra-xmod-shim
+# Astron-xmod-shim
 轻量级、声明式的 AI 服务管控中间件
 
 ## 项目概述
@@ -31,23 +31,22 @@ Astra-xmod-shim 是一款轻量级、声明式的 AI 服务管控中间件，基
 - **插件化环境抽象（Shimlet）**  
   基于接口抽象实现运行时解耦，支持 K8s、Docker 等环境通过插件无缝切换
 
-- **函数式部署编排（Pipeline）**  
-  采用函数链式编排，灵活定义部署流程，支持验证、配置、启动等阶段可扩展
+- **函数式部署目标集合（GoalSet）**  
+  采用函数链式编排，灵活定义部署动作/验证集合，支持验证、配置、启动等阶段可扩展
 
 - **轻量单体架构**  
   单二进制交付，无外部依赖，适用于边缘、本地及云原生部署场景
 
-- **状态机驱动的全生命周期管理**  
-  基于有限状态机（FSM）精确控制服务状态流转，支持部署、运行、更新、销毁的可靠追踪
-
 - **事件驱动的可观测架构**  
   通过 EventBus 解耦核心与监控、日志、追踪组件，支持异步状态同步与扩展
+
+
 
 ## 🏗️ 技术架构
 
 ModelServeShim 采用“核心引擎 + 双插件”的解耦架构，通过抽象层与流程引擎分离关注点，实现高可扩展性与环境无关性。
 
-![架构示意图](img.png)
+![架构示意图](img2.png)
 
 - **核心引擎（Core Engine）**  
   系统中枢，负责服务生命周期调度、API 接管与状态协调。基于有限状态机（FSM）管理模型服务的状态流转，确保操作的确定性与可观测性。
@@ -72,12 +71,12 @@ ModelServeShim 采用“核心引擎 + 双插件”的解耦架构，通过抽�
 
 ```bash
 # 下载二进制文件（Linux x86_64）
-wget https://github.com/iflytek/modserv-shim/releases/latest/download/model-serve-shim
+wget https://github.com/iflytek/astron-xmod-shim/releases/latest/download/model-serve-shim
 chmod +x model-serve-shim
 
 # 或从源码构建
-git clone https://github.com/iflytek/modserv-shim.git
-cd modserv-shim
+git clone https://github.com/iflytek/astron-xmod-shim.git
+cd astron-xmod-shim
 make build
 ```
 
@@ -140,7 +139,7 @@ package myshimlet
 
 import (
 	"context"
-	"modserv-shim/internal/core/deploy"
+	"astron-xmod-shim/internal/core/deploy"
 )
 
 // MyShimlet 实现自定义环境适配插件
@@ -178,7 +177,7 @@ func (s *MyShimlet) GetResourceInfo(resourceID string) (map[string]interface{}, 
 package myshimlet
 
 import (
-	"modserv-shim/internal/core/plugin"
+	"astron-xmod-shim/internal/core/plugin"
 )
 
 // init 函数在插件加载时自动调用
@@ -203,8 +202,8 @@ ModelServeShim 原生内置了 OpenSourceLLM Pipeline，用于开源大模型的
 package mypipeline
 
 import (
-	"modserv-shim/internal/core/pipeline"
-	"modserv-shim/pkg/log"
+	"astron-xmod-shim/internal/core/pipeline"
+	"astron-xmod-shim/pkg/log"
 )
 
 // 定义 pipeline 步骤函数，类型为 func(*pipeline.Context) error
@@ -237,7 +236,7 @@ func prepareResources(ctx *pipeline.Context) error {
 package mypipeline
 
 import (
-	"modserv-shim/internal/core/pipeline"
+	"astron-xmod-shim/internal/core/pipeline"
 )
 
 // init 函数在插件加载时自动调用
@@ -376,5 +375,5 @@ ModelServeShim 使用 Apache License 2.0 许可证。
 
 如有问题或建议，请通过以下方式联系我们：
 
-- GitHub Issues: https://github.com/iflytek/modserv-shim/issues
+- GitHub Issues: https://github.com/iflytek/astron-xmod-shim/issues
 - Email: hxli28@iflytek.com

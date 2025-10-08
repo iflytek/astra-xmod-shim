@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"modserv-shim/pkg/log"
+	"astron-xmod-shim/pkg/log"
 	"time"
 
 	"github.com/gin-gonic/gin"

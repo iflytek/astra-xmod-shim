@@ -15,7 +15,7 @@ linters:
 
 linters-settings:
   goimports:
-    local-prefixes: github.com/iflytek/modserv-shim
+    local-prefixes: github.com/iflytek/astron-xmod-shim
 
 issues:
   exclude-use-default: false

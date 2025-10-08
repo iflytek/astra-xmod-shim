@@ -1,16 +1,16 @@
 package orchestrator
 
 import (
+	"astron-xmod-shim/internal/config"
+	"astron-xmod-shim/internal/core/goal"
+	_ "astron-xmod-shim/internal/core/goal/goalset"
+	"astron-xmod-shim/internal/core/shimlet"
+	"astron-xmod-shim/internal/core/spec"
+	"astron-xmod-shim/internal/core/typereg"
+	"astron-xmod-shim/internal/core/workqueue"
+	dto "astron-xmod-shim/internal/dto/deploy"
+	"astron-xmod-shim/pkg/log"
 	"fmt"
-	"modserv-shim/internal/config"
-	"modserv-shim/internal/core/goal"
-	_ "modserv-shim/internal/core/goal/goalset"
-	"modserv-shim/internal/core/shimlet"
-	"modserv-shim/internal/core/spec"
-	"modserv-shim/internal/core/typereg"
-	"modserv-shim/internal/core/workqueue"
-	dto "modserv-shim/internal/dto/deploy"
-	"modserv-shim/pkg/log"
 )
 
 type Orchestrator struct {

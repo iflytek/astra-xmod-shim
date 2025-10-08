@@ -1,7 +1,7 @@
 package spec
 
 import (
-	dto "modserv-shim/internal/dto/deploy"
+	dto "astron-xmod-shim/internal/dto/deploy"
 )
 
 // MemoryStore 是 Store 的简单内存实现

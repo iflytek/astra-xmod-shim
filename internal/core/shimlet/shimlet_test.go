@@ -1,8 +1,8 @@
 package shimlet_test
 
 import (
-	"modserv-shim/internal/core/shimlet"
-	_ "modserv-shim/internal/core/shimlet/shimlets"
+	"astron-xmod-shim/internal/core/shimlet"
+	_ "astron-xmod-shim/internal/core/shimlet/shimlets"
 	"os"
 	"testing"
 )

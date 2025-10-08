@@ -1,10 +1,10 @@
 package k8s
 
 import (
+	"astron-xmod-shim/pkg/log"
 	"context"
 	"errors"
 	"fmt"
-	"modserv-shim/pkg/log"
 	"regexp"
 	stdruntime "runtime"
 	"strconv"
@@ -23,7 +23,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	// 引入配置结构体
-	config "modserv-shim/internal/dto/config"
+	config "astron-xmod-shim/internal/dto/config"
 )
 
 // K8sClient 通用K8s客户端，直接包含所有Informer组件和客户端实例
@@ -80,8 +80,8 @@ func NewK8sClient(cfg *config.K8sConfig) (*K8sClient, error) {
 			func(opts *metav1.ListOptions) { // 全局筛选器（无筛选可留空）
 			},
 		),
-		&corev1.Pod{}, // 资源对象类型
-		5*time.Minute, // 缓存重同步间隔
+		&corev1.Pod{},                                                      // 资源对象类型
+		5*time.Minute,                                                      // 缓存重同步间隔
 		cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, // 命名空间索引
 	)
 	client.podLister = cache.NewGenericLister(
@@ -404,7 +404,7 @@ func (c *K8sClient) UpsertConfigMap(namespace, name string) (*corev1.ConfigMap, 
 			Labels: map[string]string{
 				"app":        "",
 				"resource":   "llm-cm",
-				"managed-by": "modserv-shim",
+				"managed-by": "astron-xmod-shim",
 			},
 			Annotations: map[string]string{
 				"last-updated": time.Now().Format(time.RFC3339),
@@ -458,8 +458,6 @@ func (c *K8sClient) UpsertConfigMap(namespace, name string) (*corev1.ConfigMap, 
 		metav1.UpdateOptions{},
 	)
 }
-
-
 
 // validateConfigMapName Validate ConfigMap name legality
 func validateConfigMapName(name string) error {

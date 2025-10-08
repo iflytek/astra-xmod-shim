@@ -4,7 +4,7 @@ package log
 import (
 	"os"
 
-	config "modserv-shim/internal/dto/config"
+	config "astron-xmod-shim/internal/dto/config"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

@@ -1,17 +1,17 @@
 package shimlets
 
 import (
+	"astron-xmod-shim/internal/config"
+	"astron-xmod-shim/internal/core/shimlet"
+	cfg "astron-xmod-shim/internal/dto/config"
+	dto "astron-xmod-shim/internal/dto/deploy"
+	"astron-xmod-shim/pkg/k8s"
+	"astron-xmod-shim/pkg/log"
+	"astron-xmod-shim/pkg/utils"
 	"context"
 	"errors"
 	"fmt"
 	"math/rand"
-	"modserv-shim/internal/config"
-	"modserv-shim/internal/core/shimlet"
-	cfg "modserv-shim/internal/dto/config"
-	dto "modserv-shim/internal/dto/deploy"
-	"modserv-shim/pkg/k8s"
-	"modserv-shim/pkg/log"
-	"modserv-shim/pkg/utils"
 
 	"path/filepath"
 	"strings"
@@ -179,10 +179,10 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) error {
 	deploymentApply.WithNamespace("default")
 	deploymentApply.WithLabels(map[string]string{
 		"app":        deploySpec.ServiceId,
-		"managed-by": "modserv-shim",
+		"managed-by": "astron-xmod-shim",
 	})
 	deploymentApply.WithAnnotations(map[string]string{
-		"modserv-shim/service-id": deploySpec.ServiceId,
+		"astron-xmod-shim/service-id": deploySpec.ServiceId,
 	})
 
 	// Configure Deployment spec
@@ -226,7 +226,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) error {
 			WithName("models").
 			WithHostPath(
 				corev1apply.HostPathVolumeSource().
-					WithPath(modelDirPath). // Host machine path
+					WithPath(modelDirPath).             // Host machine path
 					WithType(corev1.HostPathDirectory), // Ensure it's treated as a directory
 			),
 	)
@@ -252,7 +252,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) error {
 	result, err := k.client.GetClientSet().AppsV1().Deployments("default").Apply(
 		context.Background(),
 		deploymentApply,
-		metav1.ApplyOptions{FieldManager: "modserv-shim", Force: true},
+		metav1.ApplyOptions{FieldManager: "astron-xmod-shim", Force: true},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to deploy application: %w", err)
@@ -351,10 +351,10 @@ func (k *K8sShimlet) Status(resourceId string) (*dto.RuntimeStatus, error) {
 	modelName := "unknown"
 	modelPath := "unknown"
 
-	if val, ok := deployment.Annotations["modserv-shim/model-name"]; ok {
+	if val, ok := deployment.Annotations["astron-xmod-shim/model-name"]; ok {
 		modelName = val
 	}
-	if val, ok := deployment.Annotations["modserv-shim/model-path"]; ok {
+	if val, ok := deployment.Annotations["astron-xmod-shim/model-path"]; ok {
 		modelPath = val
 	}
 
@@ -437,18 +437,18 @@ func (k *K8sShimlet) Status(resourceId string) (*dto.RuntimeStatus, error) {
 func (k *K8sShimlet) Description() string { return "k8s shimlet" }
 
 // ListDeployedServices 获取所有已部署的服务列表
-// 这个方法查询Kubernetes集群中所有由modserv-shim管理的部署，并提取对应的serviceId
+// 这个方法查询Kubernetes集群中所有由astron-xmod-shim管理的部署，并提取对应的serviceId
 func (k *K8sShimlet) ListDeployedServices() ([]string, error) {
 	if k.client == nil {
 		return []string{}, fmt.Errorf("k8s client is not initialized")
 	}
 
-	// 准备ListOptions，筛选由modserv-shim管理的部署
+	// 准备ListOptions，筛选由astron-xmod-shim管理的部署
 	listOptions := metav1.ListOptions{
-		LabelSelector: labels.Set{"managed-by": "modserv-shim"}.AsSelector().String(),
+		LabelSelector: labels.Set{"managed-by": "astron-xmod-shim"}.AsSelector().String(),
 	}
 
-	// 调用ListDeployments方法获取所有由modserv-shim管理的部署
+	// 调用ListDeployments方法获取所有由astron-xmod-shim管理的部署
 	deployments, err := k.client.ListDeployments("default", listOptions)
 	if err != nil {
 		return []string{}, fmt.Errorf("failed to list deployments: %w", err)
@@ -457,8 +457,8 @@ func (k *K8sShimlet) ListDeployedServices() ([]string, error) {
 	// 从部署中提取serviceId
 	var serviceIDs []string
 	for _, deployment := range deployments {
-		// 检查deployment是否有modserv-shim/service-id注解
-		if serviceID, exists := deployment.Annotations["modserv-shim/service-id"]; exists && serviceID != "" {
+		// 检查deployment是否有astron-xmod-shim/service-id注解
+		if serviceID, exists := deployment.Annotations["astron-xmod-shim/service-id"]; exists && serviceID != "" {
 			serviceIDs = append(serviceIDs, serviceID)
 		} else {
 			// 尝试从标签中获取serviceId

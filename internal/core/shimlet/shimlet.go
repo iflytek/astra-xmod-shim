@@ -1,8 +1,8 @@
 package shimlet
 
 import (
-	"modserv-shim/internal/core/typereg"
-	dto "modserv-shim/internal/dto/deploy"
+	"astron-xmod-shim/internal/core/typereg"
+	dto "astron-xmod-shim/internal/dto/deploy"
 )
 
 var Registry = typereg.New[Shimlet]()

@@ -1,8 +1,8 @@
 package shimlets
 
 import (
-	"modserv-shim/internal/core/shimlet"
-	dto "modserv-shim/internal/dto/deploy"
+	"astron-xmod-shim/internal/core/shimlet"
+	dto "astron-xmod-shim/internal/dto/deploy"
 )
 
 // Compile-time check to ensure shimlet interface is implemented

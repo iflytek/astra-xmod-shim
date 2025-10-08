@@ -1,4 +1,4 @@
-module modserv-shim
+module astron-xmod-shim
 
 go 1.24.0
 

@@ -1,11 +1,11 @@
 package reconciler
 
 import (
+	"astron-xmod-shim/internal/core/goal"
+	"astron-xmod-shim/internal/core/spec"
+	"astron-xmod-shim/internal/core/workqueue"
+	dto "astron-xmod-shim/internal/dto/deploy"
 	"context"
-	"modserv-shim/internal/core/goal"
-	"modserv-shim/internal/core/spec"
-	"modserv-shim/internal/core/workqueue"
-	dto "modserv-shim/internal/dto/deploy"
 	"sync"
 )
 

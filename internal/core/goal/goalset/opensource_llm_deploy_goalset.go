@@ -1,9 +1,9 @@
 package goalset
 
 import (
-	"modserv-shim/internal/config"
-	"modserv-shim/internal/core/goal"
-	"modserv-shim/pkg/log"
+	"astron-xmod-shim/internal/config"
+	"astron-xmod-shim/internal/core/goal"
+	"astron-xmod-shim/pkg/log"
 	"path/filepath"
 	"time"
 )

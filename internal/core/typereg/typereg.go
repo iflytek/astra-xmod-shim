@@ -1,9 +1,9 @@
 package typereg
 
 import (
+	"astron-xmod-shim/internal/config"
+	"astron-xmod-shim/pkg/log"
 	"fmt"
-	"modserv-shim/internal/config"
-	"modserv-shim/pkg/log"
 	"reflect"
 	"sync"
 )
