@@ -35,10 +35,7 @@ var modelPathReady = goal.Goal{
 
 var deployFinished = goal.Goal{Name: "deployFinish",
 	IsAchieved: func(ctx *goal.Context) bool {
-		if ctx.DeploySpec.ServiceId != "" {
-			return true
-		}
-		return false
+		return ctx.DeploySpec.ServiceId != ""
 	},
 	Ensure: func(ctx *goal.Context) error {
 		err := ctx.Shimlet.Apply(ctx.DeploySpec)
@@ -49,12 +46,9 @@ var deployFinished = goal.Goal{Name: "deployFinish",
 	}}
 
 var serviceExposed = goal.
-	Goal{Name: "exposeService",
+Goal{Name: "exposeService",
 	IsAchieved: func(ctx *goal.Context) bool {
-		if ctx.DeploySpec.ServiceId != "" {
-			return true
-		}
-		return false
+		return ctx.DeploySpec.ServiceId != ""
 	},
 	Ensure: func(ctx *goal.Context) error {
 		status, err := ctx.Shimlet.Status(ctx.DeploySpec.ServiceId)
@@ -70,7 +64,7 @@ func NewLLMDeployGoalSet() *goal.GoalSet {
 		AddGoal(modelPathReady).
 		AddGoal(deployFinished).
 		AddGoal(serviceExposed).
-		WithMaxRetries(10).           // 失败最多重试 10 次
+		WithMaxRetries(10). // 失败最多重试 10 次
 		WithTimeout(5 * time.Minute). // 整体超时 5 分钟
 		Build()
 }

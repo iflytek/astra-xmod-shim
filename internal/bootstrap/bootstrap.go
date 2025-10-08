@@ -30,8 +30,7 @@ func Init(configPath string) error {
 	pipeReg := goal.Registry
 
 	//  init specStore
-	var specStore spec.Store
-	specStore = spec.NewMemoryStore()
+	specStore := spec.NewMemoryStore()
 
 	// init reconciler
 	workerNum := 5
