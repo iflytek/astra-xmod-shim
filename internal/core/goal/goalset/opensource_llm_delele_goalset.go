@@ -11,7 +11,7 @@ var deployDeleted = goal.Goal{Name: "deployFinish",
 		if err != nil {
 			return false
 		}
-		return status.E == ""
+		return status == nil
 	},
 	Ensure: func(ctx *goal.Context) error {
 		err := ctx.Shimlet.Delete(ctx.DeploySpec.ServiceId)
@@ -25,7 +25,7 @@ var deployDeleted = goal.Goal{Name: "deployFinish",
 func NewLLMDeleteGoalSet() *goal.GoalSet {
 	return goal.NewGoalSetBuilder("llm-deploy").
 		AddGoal(modelPathReady).
-		AddGoal(deployFinish).
+		AddGoal(deployDeleted).
 		WithMaxRetries(10).           // 失败最多重试 3 次
 		WithTimeout(5 * time.Minute). // 整体超时 2 分钟
 		Build()
