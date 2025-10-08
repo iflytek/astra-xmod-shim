@@ -1,19 +1,19 @@
 <div align="center">
-<img src="xmod-shim.svg?v=2" alt="Astra-mod-shim Logo" width="600" />
+<img src="xmod-shim.svg?v=2" alt="Astron-mod-shim Logo" width="600" />
 <br>
 
-[![License](https://img.shields.io/github/license/iflytek/astra-xmod-shim)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/iflytek/astra-xmod-shim?include_prereleases)](https://github.com/iflytek/astra-xmod-shim/releases)
-[![CI Status](https://img.shields.io/github/actions/workflow/status/iflytek/astra-xmod-shim/ci.yml?branch=main)](https://github.com/iflytek/astra-xmod-shim/actions)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/iflytek/astra-xmod-shim)](go.mod)
-[![Coverage](https://img.shields.io/codecov/c/github/iflytek/astra-xmod-shim)](https://codecov.io/gh/iflytek/astra-xmod-shim)
+[![License](https://img.shields.io/github/license/iflytek/Astron-xmod-shim)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/iflytek/Astron-xmod-shim?include_prereleases)](https://github.com/iflytek/Astron-xmod-shim/releases)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/iflytek/Astron-xmod-shim/ci.yml?branch=main)](https://github.com/iflytek/Astron-xmod-shim/actions)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/iflytek/Astron-xmod-shim)](go.mod)
+[![Coverage](https://img.shields.io/codecov/c/github/iflytek/Astron-xmod-shim)](https://codecov.io/gh/iflytek/Astron-xmod-shim)
 ![Multi-Arch](https://img.shields.io/badge/Multi--Arch-linux%2Famd64%20%7C%20linux%2Farm64-blue?logo=docker)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Native-blue?logo=kubernetes&logoColor=white)](docs/k8s.md)
 [![Helm](https://img.shields.io/badge/Helm-Chart-blue?logo=helm&logoColor=white)](charts/)
 [![Cloud Native](https://img.shields.io/badge/Cloud-Native-blue?logo=cloudnative&logoColor=white)](https://cncf.io)
 [![Metrics](https://img.shields.io/badge/Metrics-Prometheus-green?logo=prometheus)](docs/metrics.md)
-[![Contributors](https://img.shields.io/github/contributors/iflytek/astra-xmod-shim)](https://github.com/iflytek/astra-xmod-shim/graphs/contributors)
-[![Stars](https://img.shields.io/github/stars/iflytek/astra-xmod-shim?style=social)](https://github.com/iflytek/astra-xmod-shim)
+[![Contributors](https://img.shields.io/github/contributors/iflytek/Astron-xmod-shim)](https://github.com/iflytek/Astron-xmod-shim/graphs/contributors)
+[![Stars](https://img.shields.io/github/stars/iflytek/Astron-xmod-shim?style=social)](https://github.com/iflytek/Astron-xmod-shim)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
 <span style="font-size:0.9em; color:#586375;">**Language**: [English](README_en.md) | **简体中文**</span>
@@ -25,20 +25,30 @@
 轻量级、声明式的 AI 服务管控中间件
 
 ## 项目概述
-Astra-xmod-shim 是一款轻量级、声明式的 AI 服务管控中间件，基于用户的期望状态，通过状态驱动的调协循环持续收敛至目标。通过 **Pipeline** 实现面向抽象的函数式部署流程编排，**Shimlet** 完成面向抽象的基础设施运行时适配，二者构成双层可插拔架构，将“在哪运行”与“如何部署”彻底解耦，支持快速集成新平台与定制化部署策略，真正实现“一次定义，随处部署”。
-## 🌟 核心特性
+Astron-xmod-shim 是一款轻量级、声明式的 AI 服务管控中间件，基于用户的期望状态，通过状态驱动的调协循环持续收敛至目标。通过 **Pipeline** 实现面向抽象的函数式部署流程编排，**Shimlet** 完成面向抽象的基础设施运行时适配，二者构成双层可插拔架构，将“在哪运行”与“如何部署”彻底解耦，支持快速集成新平台与定制化部署策略，真正实现“一次定义，随处部署”。
+## 🌟 核心设计理念：从意图到最终一致
+Astron-xmod-shim 的设计围绕一个核心思想：部署即收敛到一组明确目标（Goals), 不规定“必须检查什么”，只提供“如何可靠地收敛到你定义的目标”。
 
-- **插件化环境抽象（Shimlet）**  
-  基于接口抽象实现运行时解耦，支持 K8s、Docker 等环境通过插件无缝切换
+- **部署意图：DeploySpec（用户侧）**
+   用户通过提交 DeploySpec 声明“要什么” —— 例如：
+“我需要一个名为 qwen3-1.5b 的模型服务，1 个副本，使用 1 张 NVIDIA GPU，模型文件位于 /models/qwen3.tar。”
+DeploySpec 是纯意图描述，不包含任何实现细节或环境绑定，确保用户接口简洁、平台无关。
+- **Goal、GoalSet 与 执行引擎**  
+  1. Goal 是一个明确的系统目标（如“模型文件存在”），包含 IsAchieved()（判断是否达成）和 Ensure()（执行修复）。
+  2. GoalSet 是一组有序 Goal 的集合，代表某类部署场景的收敛路径，内容完全开放，可由第三方扩展。
+  3. 执行引擎由 WorkQueue + reconcile loop 构成：
+     WorkQueue 负责可靠排队（去重、重试、背压），reconcile loop 负责逐个收敛 Goal，确保最终一致性。
 
-- **函数式部署目标集合（GoalSet）**  
-  采用函数链式编排，灵活定义部署动作/验证集合，支持验证、配置、启动等阶段可扩展
+- **Shimlet（运行时适配插件**
+实现 shimlet 底层环境基础操作操作 接口，封装底层环境（如 Kubernetes、Docker）的资源操作。通过接口抽象实现运行时解耦，支持多环境无缝切换。
 
 - **轻量单体架构**  
   单二进制交付，无外部依赖，适用于边缘、本地及云原生部署场景
 
-- **事件驱动的可观测架构**  
-  通过 EventBus 解耦核心与监控、日志、追踪组件，支持异步状态同步与扩展
+   
+
+GoalSet 是一组有序、可验证、可执行的目标（Goals），构成从当前状态到期望状态的收敛路径。
+
 
 
 
@@ -48,17 +58,6 @@ ModelServeShim 采用“核心引擎 + 双插件”的解耦架构，通过抽�
 
 ![架构示意图](img3.png)
 
-- **核心引擎（Core Engine）**  
-  系统中枢，负责服务生命周期调度、API 接管与状态协调。基于有限状态机（FSM）管理模型服务的状态流转，确保操作的确定性与可观测性。
-
-- **Shimlet（运行时适配插件）**  
-  实现 `shim.Runtime` 接口，封装底层环境（如 Kubernetes、Docker）的资源操作。通过接口抽象实现运行时解耦，支持多环境无缝切换。
-
-- **Pipeline（部署流程插件）**  
-  由一系列函数式步骤（`pipeline.Step`）组成，定义模型部署的执行流程。支持阶段化编排（如校验、配置生成、资源创建），可灵活扩展。
-
-- **事件总线（EventBus）**  
-  耦合核心与观测组件，异步广播服务状态变更事件，支撑日志、监控、审计等外接系统。
 
 ## 快速开始
 
@@ -363,7 +362,7 @@ logging:
 ## 🌟 Star 历史
 
 <div align="center">
-  <img src="https://api.star-history.com/svg?repos=iflytek/astra-xmod-shim
+  <img src="https://api.star-history.com/svg?repos=iflytek/Astron-xmod-shim
 &type=Date" alt="Star History Chart" width="600">
 </div>
 
