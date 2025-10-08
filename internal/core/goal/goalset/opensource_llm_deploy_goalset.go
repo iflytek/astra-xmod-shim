@@ -28,12 +28,12 @@ var modelPathReady = goal.Goal{
 		log.Info("Mapping model name to path: %s -> %s", ctx.DeploySpec.ModelName, modelDir)
 
 		// Set mapped path to DeploySpec
-		ctx.Data["model-path"] = modelDir
+		ctx.DeploySpec.ModelFileDir = modelDir
 		return nil
 	},
 }
 
-var deployFinish = goal.Goal{Name: "deployFinish",
+var deployFinished = goal.Goal{Name: "deployFinish",
 	IsAchieved: func(ctx *goal.Context) bool {
 		if ctx.DeploySpec.ServiceId != "" {
 			return true
@@ -48,11 +48,28 @@ var deployFinish = goal.Goal{Name: "deployFinish",
 		return nil
 	}}
 
+var serviceExposed = goal.
+	Goal{Name: "exposeService",
+	IsAchieved: func(ctx *goal.Context) bool {
+		if ctx.DeploySpec.ServiceId != "" {
+			return true
+		}
+		return false
+	},
+	Ensure: func(ctx *goal.Context) error {
+		status, err := ctx.Shimlet.Status(ctx.DeploySpec.ServiceId)
+		if err != nil || status == nil {
+			return err
+		}
+		return nil
+	}}
+
 // NewLLMDeployGoalSet 创建一个用于部署 LLM 模型的 GoalSet
 func NewLLMDeployGoalSet() *goal.GoalSet {
 	return goal.NewGoalSetBuilder("llm-deploy").
 		AddGoal(modelPathReady).
-		AddGoal(deployFinish).
+		AddGoal(deployFinished).
+		AddGoal(serviceExposed).
 		WithMaxRetries(10).           // 失败最多重试 10 次
 		WithTimeout(5 * time.Minute). // 整体超时 5 分钟
 		Build()

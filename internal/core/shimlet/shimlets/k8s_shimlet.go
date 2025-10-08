@@ -226,7 +226,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) error {
 			WithName("models").
 			WithHostPath(
 				corev1apply.HostPathVolumeSource().
-					WithPath(modelDirPath).             // Host machine path
+					WithPath(modelDirPath). // Host machine path
 					WithType(corev1.HostPathDirectory), // Ensure it's treated as a directory
 			),
 	)
@@ -327,7 +327,7 @@ func (k *K8sShimlet) Status(resourceId string) (*dto.RuntimeStatus, error) {
 	if len(deployments) == 0 {
 		return &dto.RuntimeStatus{
 			DeploySpec: dto.DeploySpec{ServiceId: resourceId},
-			Status:     dto.PhaseTerminated,
+			Status:     dto.PhaseUnknown,
 		}, nil
 	}
 
