@@ -5,7 +5,7 @@ type GlobalConfig struct {
 	K8s            K8sConfig                `yaml:"k8s" mapstructure:"k8s"`
 	Server         Server                   `yaml:"server" mapstructure:"server"`
 	Log            LogConfig                `yaml:"log" mapstructure:"log"`
-	CurrentShimlet string                   `yaml:"current-shimlet" mapstructure:"current-shimlet"` // 👈 新增
+	CurrentShimlet string                   `yaml:"current-shimlet" mapstructure:"current-shimlet"`
 	Shimlets       map[string]ShimletConfig `yaml:"shimlets" mapstructure:"shimlets"`
 	ModelManage    ModelManageConfig        `yaml:"model-manage" mapstructure:"model-manage"`
 }

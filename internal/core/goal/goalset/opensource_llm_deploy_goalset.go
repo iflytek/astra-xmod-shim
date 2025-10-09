@@ -3,10 +3,16 @@ package goalset
 import (
 	"astron-xmod-shim/internal/config"
 	"astron-xmod-shim/internal/core/goal"
+	dto "astron-xmod-shim/internal/dto/deploy"
 	"astron-xmod-shim/pkg/log"
 	"path/filepath"
+	"reflect"
 	"time"
 )
+
+func init() {
+	NewLLMDeployGoalSet()
+}
 
 // 构造 mapModelNameToPath Goal
 var modelPathReady = goal.Goal{
@@ -14,7 +20,7 @@ var modelPathReady = goal.Goal{
 	IsAchieved: func(ctx *goal.Context) bool {
 		// 如果 ModelFileDir 已设置，说明已经执行过
 
-		return false
+		return ctx.DeploySpec.ModelFileDir != ""
 	},
 	Ensure: func(ctx *goal.Context) error {
 		modelRoot := config.Get().ModelManage.ModelRoot
@@ -33,9 +39,50 @@ var modelPathReady = goal.Goal{
 	},
 }
 
+var specConsistencyCheck = goal.Goal{
+	Name: "spec-consistency-check",
+	IsAchieved: func(ctx *goal.Context) bool {
+		// 如果还没有serviceId，说明还没部署过，不需要检查一致性
+		if ctx.DeploySpec.ServiceId == "" {
+			return true
+		}
+
+		// 获取当前运行时状态
+		status, err := ctx.Shimlet.Status(ctx.DeploySpec.ServiceId)
+		if err != nil {
+			log.Warn("Failed to get status for service %s: %v", ctx.DeploySpec.ServiceId, err)
+			return false
+		}
+
+		// 比较期望的spec和实际的spec是否一致
+		// 这里我们主要比较关键字段：ModelName, ModelFileDir, ResourceRequirements, ReplicaCount
+		expectedSpec := ctx.DeploySpec
+		actualSpec := status.DeploySpec
+
+		// 比较关键字段
+		if expectedSpec.ModelName != actualSpec.ModelName ||
+			expectedSpec.ReplicaCount != actualSpec.ReplicaCount ||
+			!reflect.DeepEqual(expectedSpec.ResourceRequirements, actualSpec.ResourceRequirements) {
+			log.Info("Spec inconsistency detected for service %s", ctx.DeploySpec.ServiceId)
+			return false
+		}
+
+		return true
+	},
+	Ensure: func(ctx *goal.Context) error {
+		log.Info("Re-applying spec for service %s due to inconsistency", ctx.DeploySpec.ServiceId)
+		// 如果spec不一致，重新应用当前的spec
+		return ctx.Shimlet.Apply(ctx.DeploySpec)
+	},
+}
+
 var deployFinished = goal.Goal{Name: "deployFinish",
 	IsAchieved: func(ctx *goal.Context) bool {
-		return ctx.DeploySpec.ServiceId != ""
+		status, err := ctx.Shimlet.Status(ctx.DeploySpec.ServiceId)
+		if err != nil {
+			return false
+		}
+		return status.Status != dto.PhaseUnknown
 	},
 	Ensure: func(ctx *goal.Context) error {
 		err := ctx.Shimlet.Apply(ctx.DeploySpec)
@@ -46,7 +93,7 @@ var deployFinished = goal.Goal{Name: "deployFinish",
 	}}
 
 var serviceExposed = goal.
-Goal{Name: "exposeService",
+	Goal{Name: "exposeService",
 	IsAchieved: func(ctx *goal.Context) bool {
 		return ctx.DeploySpec.ServiceId != ""
 	},
@@ -59,12 +106,13 @@ Goal{Name: "exposeService",
 	}}
 
 // NewLLMDeployGoalSet 创建一个用于部署 LLM 模型的 GoalSet
-func NewLLMDeployGoalSet() *goal.GoalSet {
-	return goal.NewGoalSetBuilder("llm-deploy").
+func NewLLMDeployGoalSet() {
+	goal.NewGoalSetBuilder("opensource-llm-deploy").
 		AddGoal(modelPathReady).
 		AddGoal(deployFinished).
+		AddGoal(specConsistencyCheck). // 添加spec一致性检查Goal
 		AddGoal(serviceExposed).
-		WithMaxRetries(10). // 失败最多重试 10 次
+		WithMaxRetries(10).           // 失败最多重试 10 次
 		WithTimeout(5 * time.Minute). // 整体超时 5 分钟
-		Build()
+		BuildAndRegister()
 }

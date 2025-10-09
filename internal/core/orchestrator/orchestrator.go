@@ -36,13 +36,18 @@ func NewOrchestrator(
 
 var GlobalOrchestrator *Orchestrator
 
-func (o *Orchestrator) Provision(spec *dto.DeploySpec) error {
+func (o *Orchestrator) Provision(spec *dto.RequirementSpec) error {
 
 	// 覆盖掉 nvidia.com/gpu 的 limit
 	spec.ResourceRequirements.AcceleratorType = "nvidia.com/gpu"
 
-	// DeploySpec 需要持久化 这是用户的部署期望 TODO: 持久化
+	// goalset 已在api handler 层 确定
+	// shimlet 已在启动时配置全局确定
 
+	// RequirementSpec 持久化 部署期望
+	spec.ReplicaCount = 1
+	spec.ShimletName = config.Get().CurrentShimlet
+	// 如果这里是更新, 则需要 对应goalset reconcile 检测到 不一致 并调用ensure 闭环
 	o.specStore.Set(spec.ServiceId, spec)
 
 	// 投递到队列

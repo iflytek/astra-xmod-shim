@@ -18,7 +18,7 @@ func (k *TemplateShimlet) InitWithConfig(confPath string) error {
 	return nil
 }
 
-func (k *TemplateShimlet) Apply(spec *dto.DeploySpec) error {
+func (k *TemplateShimlet) Apply(spec *dto.RequirementSpec) error {
 	return nil
 }
 func (k *TemplateShimlet) Delete(resourceId string) (err error) { return nil }

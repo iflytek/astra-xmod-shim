@@ -4,6 +4,7 @@ import (
 	"astron-xmod-shim/api/server"
 	"astron-xmod-shim/internal/config"
 	"astron-xmod-shim/internal/core/goal"
+	_ "astron-xmod-shim/internal/core/goal"
 	"astron-xmod-shim/internal/core/orchestrator"
 	"astron-xmod-shim/internal/core/reconciler"
 	"astron-xmod-shim/internal/core/shimlet"
@@ -34,10 +35,11 @@ func Init(configPath string) error {
 
 	// init reconciler
 	workerNum := 5
-	reconciler := reconciler.NewReconciler(specStore, workerNum)
+	workQueue := workqueue.New()
+
+	reconciler := reconciler.NewReconciler(specStore, workerNum, workQueue)
 
 	//  init workqueue
-	workQueue := workqueue.New()
 
 	// 初始化全局Tracer单例
 	infraShim, _ := shimReg.GetSingleton(cfg.CurrentShimlet)

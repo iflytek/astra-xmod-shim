@@ -7,14 +7,13 @@ import (
 
 type Context struct {
 	Data       map[string]any // 存储键值对，比如 app_id, url 等
-	DeploySpec *dto.DeploySpec
+	DeploySpec *dto.RequirementSpec
 	Shimlet    shimlet.Shimlet
 }
 
 // NewContext 创建一个新的上下文实例
 func NewContext() *Context {
 	return &Context{
-
 		Data: make(map[string]any), // 初始化 map
 	}
 }
