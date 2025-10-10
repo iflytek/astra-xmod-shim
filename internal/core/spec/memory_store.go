@@ -6,24 +6,22 @@ import (
 
 // MemoryStore 是 Store 的简单内存实现
 type MemoryStore struct {
-	specMap map[string]*dto.DeploySpec
+	specMap map[string]*dto.RequirementSpec
 }
 
 // NewMemoryStore 创建一个新的 StateManager 实例
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
-		specMap: make(map[string]*dto.DeploySpec),
+		specMap: make(map[string]*dto.RequirementSpec),
 	}
 }
 
 // Set 保存用户部署期望 以及 runtime shimlet 和 部署 goal set (目标集合)
-func (m *MemoryStore) Set(serviceID string, spec *dto.DeploySpec) {
-	if _, exists := m.specMap[serviceID]; !exists {
-		m.specMap[serviceID] = spec
-	}
+func (m *MemoryStore) Set(serviceID string, spec *dto.RequirementSpec) {
+	m.specMap[serviceID] = spec
 }
 
-func (m *MemoryStore) Get(serviceID string) *dto.DeploySpec {
+func (m *MemoryStore) Get(serviceID string) *dto.RequirementSpec {
 	return m.specMap[serviceID]
 }
 

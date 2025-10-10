@@ -2,14 +2,19 @@ package goal
 
 import "time"
 
-// pkg/goal/goalset.go
-
+type Goal struct {
+	Name       string
+	IsAchieved func(ctx *Context) bool
+	Ensure     func(ctx *Context) error
+}
 type GoalSet struct {
 	Name       string
 	Goals      []Goal
 	MaxRetries int
 	Timeout    time.Duration
 }
+
+var Registry = map[string]*GoalSet{}
 
 // GoalSetBuilder 构建器
 type GoalSetBuilder struct {
@@ -43,8 +48,9 @@ func (b *GoalSetBuilder) WithTimeout(d time.Duration) *GoalSetBuilder {
 	return b
 }
 
-func (b *GoalSetBuilder) Build() *GoalSet {
-	return &GoalSet{
+func (b *GoalSetBuilder) BuildAndRegister() {
+
+	Registry[b.name] = &GoalSet{
 		Name:       b.name,
 		Goals:      b.goals,
 		MaxRetries: b.maxRetries,

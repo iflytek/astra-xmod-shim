@@ -34,10 +34,11 @@ func Init(configPath string) error {
 
 	// init reconciler
 	workerNum := 5
-	reconciler := reconciler.NewReconciler(specStore, workerNum)
+	workQueue := workqueue.New()
+
+	reconciler := reconciler.NewReconciler(specStore, workerNum, workQueue)
 
 	//  init workqueue
-	workQueue := workqueue.New()
 
 	// 初始化全局Tracer单例
 	infraShim, _ := shimReg.GetSingleton(cfg.CurrentShimlet)

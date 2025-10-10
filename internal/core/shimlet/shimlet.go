@@ -10,7 +10,7 @@ var Registry = typereg.New[Shimlet]()
 // Shimlet is the interface that must be implemented by all shimlets.
 type Shimlet interface {
 	InitWithConfig(confPath string) error
-	Apply(spec *dto.DeploySpec) error
+	Apply(spec *dto.RequirementSpec) error
 	Delete(resourceId string) error
 	Status(resourceId string) (status *dto.RuntimeStatus, err error)
 	ID() (name string)

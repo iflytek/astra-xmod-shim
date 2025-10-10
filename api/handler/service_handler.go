@@ -33,7 +33,7 @@ type GetServiceStatusResponse struct {
 }
 
 func DoDeploy(c *gin.Context) {
-	var depSpec *dto.DeploySpec
+	var depSpec *dto.RequirementSpec
 	if err := c.ShouldBindJSON(&depSpec); err != nil {
 		log.Error("解析策略请求失败: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -44,7 +44,7 @@ func DoDeploy(c *gin.Context) {
 	}
 
 	depSpec.ServiceId = utils.GenerateSimpleID()
-
+	depSpec.GoalSetName = "opensource-llm-deploy"
 	err := orchestrator.GlobalOrchestrator.Provision(depSpec)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -131,8 +131,9 @@ func DeleteService(c *gin.Context) {
 
 	log.Info("Deleting service", "serviceID", serviceID)
 
-	// 调用orchestrator删除服务
-	err := orchestrator.GlobalOrchestrator.DeleteService(serviceID)
+	spec := &dto.RequirementSpec{ServiceId: serviceID, GoalSetName: "opensource-llm-delete", ResourceRequirements: &dto.ResourceRequirements{}}
+
+	err := orchestrator.GlobalOrchestrator.Provision(spec)
 	if err != nil {
 		log.Error("Delete service failed", "error", err)
 		response := DeleteServiceResponse{
@@ -171,7 +172,7 @@ func UpdateService(c *gin.Context) {
 		return
 	}
 
-	var depSpec *dto.DeploySpec
+	var depSpec *dto.RequirementSpec
 	if err := c.ShouldBindJSON(&depSpec); err != nil {
 		log.Error("解析策略请求失败: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -185,7 +186,7 @@ func UpdateService(c *gin.Context) {
 	depSpec.ServiceId = serviceID
 
 	log.Info("Updating service", "serviceID", serviceID)
-
+	depSpec.GoalSetName = "opensource-llm-deploy"
 	// 复用部署逻辑进行更新
 	err := orchestrator.GlobalOrchestrator.Provision(depSpec)
 	if err != nil {

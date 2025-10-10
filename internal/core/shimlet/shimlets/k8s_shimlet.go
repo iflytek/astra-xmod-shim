@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strconv"
 
 	"path/filepath"
 	"strings"
@@ -67,7 +68,7 @@ func (k *K8sShimlet) InitWithConfig(confPath string) error {
 //   - Mounts the model volume at the same path used in --model and MODEL env
 //
 // Returns a success message with exposed port, or an error if deployment fails.
-func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) error {
+func (k *K8sShimlet) Apply(deploySpec *dto.RequirementSpec) error {
 	// Generate deployment and container names
 	deploymentName := utils.ModelNameToDeploymentName(deploySpec.ModelName) + "-" + deploySpec.ServiceId
 	mainContainerName := utils.ModelNameToDeploymentName(deploySpec.ModelName)
@@ -122,7 +123,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) error {
 	envVars := []*corev1apply.EnvVarApplyConfiguration{
 		{
 			Name:  ptr("MODEL"),
-			Value: &modelDirPath, // Model root directory (no 'local:' prefix)
+			Value: &deploySpec.ModelName, // Model root directory (no 'local:' prefix)
 		},
 		{
 			Name:  ptr("SERVING_ENGINE"),
@@ -168,6 +169,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) error {
 		"--port="+portStr,
 		"--model="+modelDirPath, // Model path must match volume mount
 		"--dtype=auto",
+		"--served-model-name="+deploySpec.ModelName,
 		"--trust-remote-code", // Required for models like Qwen
 	)
 
@@ -183,6 +185,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.DeploySpec) error {
 	})
 	deploymentApply.WithAnnotations(map[string]string{
 		"astron-xmod-shim/service-id": deploySpec.ServiceId,
+		"astron-xmod-shim/model-name": deploySpec.ModelName,
 	})
 
 	// Configure Deployment spec
@@ -326,7 +329,7 @@ func (k *K8sShimlet) Status(resourceId string) (*dto.RuntimeStatus, error) {
 	// If no deployments found, return terminated status
 	if len(deployments) == 0 {
 		return &dto.RuntimeStatus{
-			DeploySpec: dto.DeploySpec{ServiceId: resourceId},
+			DeploySpec: dto.RequirementSpec{ServiceId: resourceId},
 			Status:     dto.PhaseUnknown,
 		}, nil
 	}
@@ -418,12 +421,66 @@ func (k *K8sShimlet) Status(resourceId string) (*dto.RuntimeStatus, error) {
 		endpoint = fmt.Sprintf("http://%s:%d", nodeIP, nodePort)
 	}
 
+	// 从Deployment中提取ResourceRequirements信息
+	var resourceRequirements *dto.ResourceRequirements
+	if len(deployment.Spec.Template.Spec.Containers) > 0 {
+		container := deployment.Spec.Template.Spec.Containers[0]
+		if len(container.Resources.Limits) > 0 {
+			for resourceName, quantity := range container.Resources.Limits {
+				// 检查是否是GPU资源
+				if strings.Contains(string(resourceName), "gpu") || strings.Contains(string(resourceName), "nvidia") {
+					resourceRequirements = &dto.ResourceRequirements{
+						AcceleratorType:  string(resourceName),
+						AcceleratorCount: int(quantity.Value()),
+					}
+					break
+				}
+			}
+		}
+	}
+
+	// 从Deployment的环境变量中提取ContextLength和Env信息
+	var contextLength int
+	var envVars []dto.Env
+	if len(deployment.Spec.Template.Spec.Containers) > 0 {
+		container := deployment.Spec.Template.Spec.Containers[0]
+		for _, envVar := range container.Env {
+			switch envVar.Name {
+			case "CONTEXT_LENGTH":
+				if val, err := strconv.Atoi(envVar.Value); err == nil {
+					contextLength = val
+				}
+			default:
+				envVars = append(envVars, dto.Env{
+					Key:   envVar.Name,
+					Value: envVar.Value,
+				})
+			}
+		}
+	}
+
+	// 从Deployment注解中提取GoalSetName和ShimletName
+	goalSetName := "opensource-llm-deploy" // 默认值
+	shimletName := "k8s"                   // 默认值
+
+	if val, ok := deployment.Annotations["astron-xmod-shim/goal-set-name"]; ok {
+		goalSetName = val
+	}
+	if val, ok := deployment.Annotations["astron-xmod-shim/shimlet-name"]; ok {
+		shimletName = val
+	}
+
 	// Build deploy spec
-	spec := dto.DeploySpec{
-		ServiceId:    resourceId,
-		ModelName:    modelName,
-		ModelFileDir: modelPath,
-		ReplicaCount: replicaCount,
+	spec := dto.RequirementSpec{
+		ServiceId:            resourceId,
+		ModelName:            modelName,
+		ModelFileDir:         modelPath,
+		ResourceRequirements: resourceRequirements,
+		ReplicaCount:         replicaCount,
+		ContextLength:        contextLength,
+		Env:                  envVars,
+		GoalSetName:          goalSetName,
+		ShimletName:          shimletName,
 	}
 
 	return &dto.RuntimeStatus{
