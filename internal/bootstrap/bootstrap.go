@@ -4,7 +4,6 @@ import (
 	"astron-xmod-shim/api/server"
 	"astron-xmod-shim/internal/config"
 	"astron-xmod-shim/internal/core/goal"
-	_ "astron-xmod-shim/internal/core/goal"
 	"astron-xmod-shim/internal/core/orchestrator"
 	"astron-xmod-shim/internal/core/reconciler"
 	"astron-xmod-shim/internal/core/shimlet"
