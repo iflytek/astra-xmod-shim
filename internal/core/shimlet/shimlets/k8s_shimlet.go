@@ -123,7 +123,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.RequirementSpec) error {
 	envVars := []*corev1apply.EnvVarApplyConfiguration{
 		{
 			Name:  ptr("MODEL"),
-			Value: &modelDirPath, // Model root directory (no 'local:' prefix)
+			Value: &deploySpec.ModelName, // Model root directory (no 'local:' prefix)
 		},
 		{
 			Name:  ptr("SERVING_ENGINE"),
@@ -169,6 +169,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.RequirementSpec) error {
 		"--port="+portStr,
 		"--model="+modelDirPath, // Model path must match volume mount
 		"--dtype=auto",
+		"--served-model-name="+deploySpec.ModelName,
 		"--trust-remote-code", // Required for models like Qwen
 	)
 

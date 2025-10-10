@@ -2,6 +2,7 @@ package goalset
 
 import (
 	"astron-xmod-shim/internal/core/goal"
+	dto "astron-xmod-shim/internal/dto/deploy"
 	"time"
 )
 
@@ -15,7 +16,7 @@ var deployDeleted = goal.Goal{Name: "deployFinish",
 		if err != nil {
 			return false
 		}
-		return status == nil
+		return status.Status == dto.PhaseUnknown || status.Status == dto.PhaseTerminated
 	},
 	Ensure: func(ctx *goal.Context) error {
 		err := ctx.Shimlet.Delete(ctx.DeploySpec.ServiceId)
@@ -28,9 +29,8 @@ var deployDeleted = goal.Goal{Name: "deployFinish",
 // NewLLMDeleteGoalSet 创建一个用于下线 LLM 模型的 GoalSet
 func NewLLMDeleteGoalSet() {
 	goal.NewGoalSetBuilder("opensource-llm-delete").
-		AddGoal(modelPathReady).
 		AddGoal(deployDeleted).
-		WithMaxRetries(10).           // 失败最多重试 3 次
+		WithMaxRetries(10). // 失败最多重试 3 次
 		WithTimeout(5 * time.Minute). // 整体超时 2 分钟
 		BuildAndRegister()
 }

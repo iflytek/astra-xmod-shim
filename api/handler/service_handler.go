@@ -131,7 +131,7 @@ func DeleteService(c *gin.Context) {
 
 	log.Info("Deleting service", "serviceID", serviceID)
 
-	spec := &dto.RequirementSpec{GoalSetName: "opensource-llm-delete"}
+	spec := &dto.RequirementSpec{ServiceId: serviceID, GoalSetName: "opensource-llm-delete", ResourceRequirements: &dto.ResourceRequirements{}}
 
 	err := orchestrator.GlobalOrchestrator.Provision(spec)
 	if err != nil {

@@ -14,6 +14,27 @@ func init() {
 	NewLLMDeployGoalSet()
 }
 
+// areResourceRequirementsEqual 比较两个 ResourceRequirements 是否相等
+// 处理 nil 和零值的情况
+func areResourceRequirementsEqual(expected, actual *dto.ResourceRequirements) bool {
+	// 如果都为 nil，认为相等
+	if expected == nil && actual == nil {
+		return true
+	}
+
+	// 如果其中一个为 nil，另一个不为 nil，但所有字段都是零值，也认为相等
+	if expected == nil && actual != nil {
+		return actual.AcceleratorType == "" && actual.AcceleratorCount == 0
+	}
+
+	if expected != nil && actual == nil {
+		return expected.AcceleratorCount == 0
+	}
+
+	// 都不为 nil，使用 reflect.DeepEqual 比较
+	return reflect.DeepEqual(expected, actual)
+}
+
 // 构造 mapModelNameToPath Goal
 var modelPathReady = goal.Goal{
 	Name: "map-model-path",
@@ -62,7 +83,7 @@ var specConsistencyCheck = goal.Goal{
 		// 比较关键字段
 		if expectedSpec.ModelName != actualSpec.ModelName ||
 			expectedSpec.ReplicaCount != actualSpec.ReplicaCount ||
-			!reflect.DeepEqual(expectedSpec.ResourceRequirements, actualSpec.ResourceRequirements) {
+			!areResourceRequirementsEqual(expectedSpec.ResourceRequirements, actualSpec.ResourceRequirements) {
 			log.Info("Spec inconsistency detected for service %s", ctx.DeploySpec.ServiceId)
 			return false
 		}
@@ -99,7 +120,7 @@ var serviceExposed = goal.
 	},
 	Ensure: func(ctx *goal.Context) error {
 		status, err := ctx.Shimlet.Status(ctx.DeploySpec.ServiceId)
-		if err != nil || status == nil {
+		if err != nil || status.EndPoint == "" {
 			return err
 		}
 		return nil

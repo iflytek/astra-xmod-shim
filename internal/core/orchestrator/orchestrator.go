@@ -82,9 +82,17 @@ func (o *Orchestrator) GetServiceStatus(serviceID string) (*dto.RuntimeStatus, e
 		return nil, fmt.Errorf("serviceID is required")
 	}
 
-	//o.specStore.GetStatus(serviceID)
-
-	// 如果没找到，可以返回“不存在”，或 fallback 到远程查询（可选）
-
-	return nil, nil
+	currentShimletId := config.Get().CurrentShimlet
+	runtimeShimlet, err := o.shimReg.GetSingleton(currentShimletId)
+	if err != nil {
+		return nil, err
+	}
+	status, err := runtimeShimlet.Status(serviceID)
+	if err != nil {
+		return nil, err
+	}
+	if status.EndPoint != "" {
+		status.EndPoint += "/v1/chat/completions"
+	}
+	return status, nil
 }
