@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "astron-xmod-shim.fullname" . }}
+  labels:
+    {{- include "astron-xmod-shim.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "astron-xmod-shim.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "astron-xmod-shim.labels" . | nindent 8 }}
+    spec:
+      {{- if .Values.useHostNetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
+      serviceAccountName: {{ include "astron-xmod-shim.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Chart.Version }}"  # Changed to use AppVersion instead of Chart.Version
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh"]  # Added command to use bash shell
+          args: ["-c", "sleep infinity"]  # Added args to keep container running
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          volumeMounts:
+            {{- toYaml .Values.volumeMounts | nindent 12 }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "astron-xmod-shim.fullname" . }}-config
+        {{- toYaml .Values.volumes | nindent 8 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

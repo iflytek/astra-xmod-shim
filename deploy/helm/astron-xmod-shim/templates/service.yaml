@@ -7,7 +7,6 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   {{- if .Values.useHostNetwork }}
-  # When using hostNetwork, we don't need ClusterIP
   clusterIP: None
   {{- end }}
   ports:
