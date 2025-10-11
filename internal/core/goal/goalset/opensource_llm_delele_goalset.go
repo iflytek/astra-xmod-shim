@@ -30,7 +30,7 @@ var deployDeleted = goal.Goal{Name: "deployFinish",
 func NewLLMDeleteGoalSet() {
 	goal.NewGoalSetBuilder("opensource-llm-delete").
 		AddGoal(deployDeleted).
-		WithMaxRetries(10). // 失败最多重试 3 次
+		WithMaxRetries(10).           // 失败最多重试 3 次
 		WithTimeout(5 * time.Minute). // 整体超时 2 分钟
 		BuildAndRegister()
 }

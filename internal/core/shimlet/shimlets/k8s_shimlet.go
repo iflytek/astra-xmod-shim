@@ -105,7 +105,7 @@ func (k *K8sShimlet) Apply(deploySpec *dto.RequirementSpec) error {
 		resources.WithRequests(corev1.ResourceList{})
 		resources.WithLimits(corev1.ResourceList{})
 
-		if deploySpec.ResourceRequirements.AcceleratorType != "" && deploySpec.ResourceRequirements.AcceleratorCount > 0 {
+		if deploySpec.ResourceRequirements.AcceleratorType != "" && deploySpec.ResourceRequirements.AcceleratorCount >= 0 {
 			limits := corev1.ResourceList{}
 			acceleratorResource := corev1.ResourceName(deploySpec.ResourceRequirements.AcceleratorType)
 			limits[acceleratorResource] = resource.MustParse(fmt.Sprintf("%d", deploySpec.ResourceRequirements.AcceleratorCount))

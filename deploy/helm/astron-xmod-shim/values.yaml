@@ -1,33 +1,32 @@
-# Default values for astron-xmod-shim.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# 这是 YAML 格式的文件。
+# 声明要传递到模板中的变量。
 
-# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+# 这将设置副本集计数，更多信息可以在这里找到：https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
 replicaCount: 1
 
-# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+# 这设置容器镜像，更多信息可以在这里找到：https://kubernetes.io/docs/concepts/containers/images/
 image:
-  repository: astron-xmod-shim
-  # This sets the pull policy for images.
+  repository: artifacts.iflytek.com/docker-private/aiaas/astron-xmod-shim
+  # 这设置图像的拉取策略。
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "{{ .Chart.AppVersion }}"
+  # 移除这一行，让 deployment.yaml 使用默认的 .Chart.AppVersion
+  # tag: "{{ .Chart.AppVersion }}"
 
-# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+# 这是用于从私有仓库拉取图像的密钥，更多信息可以在这里找到：https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
-# This is to override the chart name.
+# 这是为了覆盖图表名称。
 nameOverride: ""
 fullnameOverride: ""
 
-# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+# 此部分构建服务账户，更多信息可以在这里找到：https://kubernetes.io/docs/concepts/security/service-accounts/
 serviceAccount:
-  # Specifies whether a service account should be created
+  # 指定是否应创建服务账户
   create: true
-  # Automatically mount a ServiceAccount's API credentials?
+  # 自动挂载 ServiceAccount 的 API 凭证？
   automount: true
-  # Annotations to add to the service account
+  # 要添加到服务账户的注释
   annotations: {}
-  # The name of the service account to use.
+  # 要使用的服务账户的名称。
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
@@ -124,7 +123,9 @@ volumeMounts:
     mountPath: /mnt/maasmodels/
     readOnly: true
 
-nodeSelector: {}
+# 修改后
+nodeSelector:
+  kubernetes.io/hostname: dx-l20-10.246.53.166.maas.cn
 
 tolerations: []
 

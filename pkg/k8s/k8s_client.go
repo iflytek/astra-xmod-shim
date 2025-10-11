@@ -80,8 +80,8 @@ func NewK8sClient(cfg *config.K8sConfig) (*K8sClient, error) {
 			func(opts *metav1.ListOptions) { // 全局筛选器（无筛选可留空）
 			},
 		),
-		&corev1.Pod{},                                                      // 资源对象类型
-		5*time.Minute,                                                      // 缓存重同步间隔
+		&corev1.Pod{}, // 资源对象类型
+		5*time.Minute, // 缓存重同步间隔
 		cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, // 命名空间索引
 	)
 	client.podLister = cache.NewGenericLister(

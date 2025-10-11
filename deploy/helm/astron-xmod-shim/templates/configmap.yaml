@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "astron-xmod-shim.fullname" . }}-config
+  labels:
+    {{- include "astron-xmod-shim.labels" . | nindent 4 }}
+data:
+  # 保持键名与实际路径一致，便于目录挂载
+  conf.yaml: {{ .Files.Get "files/conf.yaml" | quote }}
+  k8s-shimlet.yaml: {{ .Files.Get "files/k8s-shimlet.yaml" | quote }}
+  kubeconfig: {{ .Files.Get "files/kubeconfig" | quote }}
